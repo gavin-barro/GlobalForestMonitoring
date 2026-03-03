@@ -1,0 +1,56 @@
+global-forest-watch/
+├── backend/
+│   ├── app/
+│   │   ├── init.py
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   ├── crud.py
+│   │   ├── dependencies.py
+│   │   ├── routers/
+│   │   │   ├── init.py
+│   │   │   ├── users.py
+│   │   │   ├── regions.py
+│   │   │   ├── reports.py
+│   │   │   ├── pending_updates.py
+│   │   │   ├── subscriptions.py
+│   │   │   ├── time_periods.py
+│   │   │   └── metrics.py
+│   │   └── tests/
+│   │       ├── init.py
+│   │       └── test_main.py
+│   ├── .env
+│   ├── requirements.txt
+|
+├── frontend/
+│   ├── public/
+│   │   ├── index.html
+│   │   └── favicon.ico
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── MapView.tsx
+│   │   │   ├── ReportViewer.tsx
+│   │   │   ├── SubscriptionForm.tsx
+│   │   │   ├── UserProfile.tsx
+│   │   │   └── AdminDashboard.tsx
+│   │   ├── pages/
+│   │   │   ├── Home.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Register.tsx
+│   │   │   ├── Regions.tsx
+│   │   │   ├── Reports.tsx
+│   │   │   ├── Subscriptions.tsx
+│   │   │   └── Admin.tsx
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── App.css
+│   │   └── index.css
+│   ├── package.json
+│   └── .env
+│
+└── README.md

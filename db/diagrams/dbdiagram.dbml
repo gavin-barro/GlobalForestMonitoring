@@ -1,0 +1,98 @@
+// Global Forest Watch Database System
+// PostgreSQL Schema for dbdiagram.io
+// CS 5614 - Team: James Agresto, Gavin Barro, Peter Gillen
+
+Table users {
+  user_id          int [pk, increment]
+  username         varchar(50) [unique, not null]
+  pw_hash          varchar(255) [not null]
+  acct_type        varchar(20) [not null]
+  email            varchar(100) [unique, not null]
+  creation_date    date [not null, default: `CURRENT_DATE`]
+  last_login       timestamp
+}
+
+Table metrics {
+  metric_id        int [pk, increment]
+  metric_name      varchar(100) [unique, not null]
+  description      text
+  unit             varchar(30) [not null]
+  value_type       varchar(20) [not null]
+}
+
+Table time_periods {
+  period_id        int [pk, increment]
+  period_name      varchar(100) [not null]
+  start_year       int [not null]
+  end_year         int
+}
+
+Table regions {
+  region_id        int [pk, increment]
+  region_name      varchar(150) [not null]
+  region_type      varchar(50) [not null]
+  geo_boundary     text
+  parent_region    int
+}
+
+Table land_cover_types {
+  lct_id           int [pk, increment]
+  type_name        varchar(100) [unique, not null]
+  description      text
+  category         varchar(50) [not null]
+}
+
+Table region_classifications {
+  lct_id           int [pk]
+  rc_region_id     int [pk]
+}
+
+Table forest_observations {
+  observation_id       int [pk, increment]
+  value                numeric(18,4) [not null]
+  source_date          date [not null]
+  observation_period_id int [not null]
+  observation_metric   int [not null]
+  describing_region_id  int [not null]
+}
+
+Table pending_updates {
+  update_id            int [pk, increment]
+  submit_date          timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  proposed_value       numeric(18,4) [not null]
+  reason               text [not null]
+  status               varchar(20) [not null]
+  approving_admin_id   int
+  submitting_user_id   int [not null]
+  forest_observation_id int
+}
+
+Table subscriptions {
+  user_id          int [pk]
+  metric_id        int
+  region_id        int
+  active           boolean [not null, default: true]
+  threshold_value  numeric(10,4)
+}
+
+// RELATIONSHIPS (Foreign Keys)
+
+Ref: users.user_id < pending_updates.submitting_user_id
+Ref: users.user_id < pending_updates.approving_admin_id
+Ref: users.user_id < subscriptions.user_id
+
+Ref: metrics.metric_id < forest_observations.observation_metric
+Ref: metrics.metric_id < subscriptions.metric_id
+
+Ref: time_periods.period_id < forest_observations.observation_period_id
+
+Ref: regions.region_id < forest_observations.describing_region_id
+Ref: regions.region_id < regions.parent_region          // self-reference (hierarchy)
+Ref: regions.region_id < subscriptions.region_id
+Ref: regions.region_id < region_classifications.rc_region_id
+
+Ref: land_cover_types.lct_id < region_classifications.lct_id
+
+Ref: forest_observations.observation_id < pending_updates.forest_observation_id
+
+Ref: "forest_observations"."observation_id" < "forest_observations"."value"

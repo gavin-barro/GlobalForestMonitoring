@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 # from .database import get_db, engine, etc.  TODO
-# from .routers import users, regions, reports, subscriptions, pending_updates, time_periods, metrics, etc. TODO
+from .routers import users # TODO: regions, reports, subscriptions, pending_updates, time_periods, metrics, etc.
 
 app = FastAPI(
     title = "Global Forest Watch Database System",
@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 # TODO: add all the routers
-# app.include_router(users.router)
+app.include_router(users.router)
 # app.include_router(regions.router)
 # app.include_router(reports.router)
 # app.include_router(subscriptions.router)
@@ -61,7 +61,6 @@ async def hello_world():
     versa  -- in the routers folder
     
     Gavin can work on this part
-
 """
 
 # How to run (from project root: python -m backend.app.main)

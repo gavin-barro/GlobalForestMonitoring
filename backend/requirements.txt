@@ -1,1 +1,5 @@
 bcrypt
+fastapi
+uvicorn[standard]
+sqlalchemy[postgresql]
+python-dotenv

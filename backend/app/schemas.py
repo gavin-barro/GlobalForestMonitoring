@@ -109,12 +109,13 @@ class LCTResponse(LCTBase):
 class FOBase(BaseModel):
     fo_observation_id: int
     fo_value: float
-    fo_source_date: data
+    fo_source_date: date
     fo_period_id: int
     fo_metric_id: int
     fo_region_id: int
 
 class FOCreate(FOBase):
+    pass
 
 class FOUpdate(BaseModel):
     fo_observation_id: Optional[int]
@@ -135,11 +136,13 @@ class TPBase(BaseModel):
     end_date: Optional[date]
 
 class TPCreate(TPBase):
+    pass
 
 class TPUpdate(BaseModel): 
     period_name: Optional[str] = None
 
 class TPResponse(TPBase):
+    pass
 
 # PendingUpdate Schema
 
@@ -170,5 +173,7 @@ class RCBase(BaseModel):
     region_id: int
 
 class RCCreate(RCBase):
+    pass
 
 class RCResponse(RCBase):
+    pass

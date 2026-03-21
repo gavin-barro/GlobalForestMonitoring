@@ -133,39 +133,49 @@ class RegionRepository(BaseRepository):
 class MetricRepository(BaseRepository):
     """Repository for Metric operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Metrics]:
-        return self.db.query(Metrics).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Metrics]:
+        sql_statement = select(Metrics).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
+    
+    async def get_by_id(self, metric_id: int) -> Optional[Metrics]:
+        sql_statement = select(Metrics).where(Metrics.metric_id == metric_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_id(self, metric_id: int) -> Optional[Metrics]:
-        return self.db.query(Metrics).filter(Metrics.metric_id == metric_id).first()
-
-    def get_by_metric_name(self, metric_name: str) -> Optional[Metrics]:
-        return self.db.query(Metrics).filter(Metrics.metric_name == metric_name).first()
-
-    def create(self, metric_data: MetricCreate) -> Metrics:
+    async def get_by_metric_name(self, metric_name: str) -> Optional[Metrics]:
+        sql_statement = select(Metrics).where(Metrics.metric_name == metric_name)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
+    
+    async def create(self, metric_data: MetricCreate) -> Metrics:
         metric = Metrics(**metric_data.model_dump())
         self.db.add(metric)
-        self.commit()
-        self.refresh(metric)
+        await self.commit()
+        await self.refresh(metric)
         return metric
 
-    def update(self, metric_id: int, metric_update: MetricUpdate) -> Optional[Metrics]:
-        metric = self.get_by_id(metric_id)
-        if metric:
-            metric_data = metric_update.model_dump(exclude_unset=True)
-            for key, value in metric_data.items():
-                setattr(metric, key, value)
-            self.commit()
-            self.refresh(metric)
+    async def update(self, metric_id: int, metric_update: MetricUpdate) -> Optional[Metrics]:
+        metric = await self.get_by_id(metric_id)
+        if not metric:
+            return None
+
+        update_data = metric_update.model_dump(exclude_unset=True)
+        if update_data:
+            sql_statement = (update(Metrics).where(Metrics.metric_id == metric_id).values(**update_data))
+            await self.db.execute(sql_statement)
+            await self.commit()
+            await self.refresh(metric)
         return metric
 
-    def delete(self, metric_id: int) -> bool:
-        metric = self.get_by_id(metric_id)
-        if metric:
-            self.db.delete(metric)
-            self.commit()
-            return True
-        return False
+
+    async def delete(self, metric_id: int) -> bool:
+        metric = await self.get_by_id(metric_id)
+        if not metric:
+            return False
+        await self.db.delete(metric)
+        await self.commit()
+        return True
 
 
 class SubscriptionRepository(BaseRepository):
@@ -274,76 +284,95 @@ class LCTRepository(BaseRepository):
 class FORepository(BaseRepository):
     """Repository for ForestObservations operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[ForestObservations]:
-        return self.db.query(ForestObservations).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[ForestObservations]:
+        sql_statement = select(ForestObservations).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
+    
+    async def get_by_id(self, fo_id: int) -> Optional[ForestObservations]:
+        sql_statement = select(ForestObservations).where(ForestObservations.fo_id == fo_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_id(self, ob_id: int) -> Optional[ForestObservations]:
-        return self.db.query(ForestObservations).filter(ForestObservations.ob_id == ob_id).first()
+    async def get_by_region_id(self, region_id: int) -> Optional[ForestObservations]:
+        sql_statement = select(ForestObservations).where(ForestObservations.region_id == region_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def get_by_region_id(self, region_id: int) -> Optional[ForestObservations]:
-        return self.db.query(ForestObservations).filter(ForestObservations.region_id == region_id).first()
+    async def create(self, fo_data: FOCreate) -> ForestObservations:
+        fo = ForestObservations(**fo_data.model_dump())
+        self.db.add(fo)
+        await self.commit()
+        await self.refresh(fo)
+        return fo
 
-    def create(self, ob_data: FOCreate) -> ForestObservations:
-        ob = ForestObservations(**ob_data.model_dump())
-        self.db.add(ob)
-        self.commit()
-        self.refresh(ob)
-        return ob
+    async def update(self, fo_id: int, fo_update: FOUpdate) -> Optional[ForestObservations]:
+        fo = await self.get_by_id(fo_id)
+        if not fo:
+            return None
 
-    def update(self, ob_id: int, ob_update: FOUpdate) -> Optional[ForestObservations]:
-        ob = self.get_by_id(ob_id)
-        if ob:
-            ob_data = ob_update.model_dump(exclude_unset=True)
-            for key, value in ob_data.items():
-                setattr(ob, key, value)
-            self.commit()
-            self.refresh(ob)
-        return ob
+        update_data = fo_update.model_dump(exclude_unset=True)
+        if update_data:
+            sql_statement = (update(ForestObservations).where(ForestObservations.fo_id == fo_id).values(**update_data))
+            await self.db.execute(sql_statement)
+            await self.commit()
+            await self.refresh(fo)
+        return fo
 
-    def delete(self, ob_id: int) -> bool:
-        ob = self.get_by_id(ob_id)
-        if ob:
-            self.db.delete(ob)
-            self.commit()
-            return True
-        return False
+    async def delete(self, fo_id: int) -> bool:
+        fo = await self.get_by_id(fo_id)
+        if not fo:
+            return False
+        await self.db.delete(fo)
+        await self.commit()
+        return True
+
 
 class TPRepository(BaseRepository):
     """Repository for TimePeriods operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[TimePeriods]:
-        return self.db.query(TimePeriods).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[TimePeriods]:
+        sql_statement = select(TimePeriods).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
+    
+    async def get_by_id(self, tp_id: int) -> Optional[TimePeriods]:
+        sql_statement = select(TimePeriods).where(TimePeriods.tp_id == tp_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_id(self, tp_id: int) -> Optional[TimePeriods]:
-        return self.db.query(TimePeriods).filter(TimePeriods.tp_id == tp_id).first()
+    async def get_by_tp_name(self, tp_name: str) -> Optional[TimePeriods]:
+        sql_statement = select(TimePeriods).where(TimePeriods.tp_name == tp_name)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_tp_name(self, tp_name: str) -> Optional[TimePeriods]:
-        return self.db.query(TimePeriods).filter(TimePeriods.tp_name == tp_name).first()
-
-    def create(self, tp_data: TPCreate) -> TimePeriods:
+    async def create(self, tp_data: TPCreate) -> TimePeriods:
         tp = TimePeriods(**tp_data.model_dump())
         self.db.add(tp)
-        self.commit()
-        self.refresh(tp)
+        await self.commit()
+        await self.refresh(tp)
         return tp
 
-    def update(self, tp_id: int, tp_update: TPUpdate) -> Optional[TimePeriods]:
-        tp = self.get_by_id(tp_id)
-        if tp:
-            tp_data = tp_update.model_dump(exclude_unset=True)
-            for key, value in tp_data.items():
-                setattr(tp, key, value)
-            self.commit()
-            self.refresh(tp)
+    async def update(self, tp_id: int, tp_update: TPUpdate) -> Optional[TimePeriods]:
+        tp = await self.get_by_id(tp_id)
+        if not tp:
+            return None
+
+        update_data = tp_update.model_dump(exclude_unset=True)
+        if update_data:
+            sql_statement = (update(TimePeriods).where(TimePeriods.tp_id == tp_id).values(**update_data))
+            await self.db.execute(sql_statement)
+            await self.commit()
+            await self.refresh(tp)
         return tp
 
-    def delete(self, tp_id: int) -> bool:
-        tp = self.get_by_id(tp_id)
-        if tp:
-            self.db.delete(tp)
-            self.commit()
-            return True
-        return False
+    async def delete(self, tp_id: int) -> bool:
+        tp = await self.get_by_id(tp_id)
+        if not tp:
+            return False
+        await self.db.delete(tp)
+        await self.commit()
+        return True
     
 class PURepository(BaseRepository):
     """Repository for PendingUpdates operations."""

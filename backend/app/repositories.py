@@ -171,47 +171,67 @@ class MetricRepository(BaseRepository):
 class SubscriptionRepository(BaseRepository):
     """Repository for Subscription operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Subscriptions]:
-        return self.db.query(Subscriptions).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Subscriptions]:
+        sql_statement = select(Subscriptions).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def get_by_id(self, user_id: int, region_id: int, metric_id: int) -> Optional[Subscriptions]:
-        return self.db.query(Subscriptions).filter(
+    async def get_by_ids(self, user_id: int, metric_id: int, region_id: int) -> Optional[Subscriptions]:
+        sql_statement = select(Subscriptions).where(
             Subscriptions.user_id == user_id,
-            Subscriptions.region_id == region_id,
-            Subscriptions.metric_id == metric_id
-        ).first()
+            Subscriptions.metric_id == metric_id,
+            Subscriptions.region_id == region_id
+        )
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_user_id(self, user_id: int) -> Optional[List[Subscriptions]]:
-        return self.db.query(Subscriptions).filter(Subscriptions.user_id == user_id).all()
+    async def get_by_user(self, user_id: int) -> List[Subscriptions]:
+        sql_statement = select(Subscriptions).where(Subscriptions.user_id == user_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def get_by_region_id(self, region_id: int) -> Optional[List[Subscriptions]]:
-        return self.db.query(Subscriptions).filter(Subscriptions.region_id == region_id).all()
+    async def get_by_region(self, region_id: int) -> List[Subscriptions]:
+        sql_statement = select(Subscriptions).where(Subscriptions.region_id == region_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def create(self, sub_data: SubscriptionCreate) -> Subscriptions:
+    async def get_by_metric(self, metric_id: int) -> List[Subscriptions]:
+        sql_statement = select(Subscriptions).where(Subscriptions.metric_id == metric_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
+
+    async def create(self, sub_data: SubscriptionCreate) -> Subscriptions:
         sub = Subscriptions(**sub_data.model_dump())
         self.db.add(sub)
-        self.commit()
-        self.refresh(sub)
+        await self.commit()
+        await self.refresh(sub)
         return sub
 
-    def update(self, user_id: int, region_id: int, metric_id: int, sub_update: SubscriptionUpdate) -> Optional[Subscriptions]:
-        sub = self.get_by_id(user_id, region_id, metric_id)
-        if sub:
-            sub_data = sub_update.model_dump(exclude_unset=True)
-            for key, value in sub_data.items():
-                setattr(sub, key, value)
-            self.commit()
-            self.refresh(sub)
-        return sub
+    async def update( self, user_id: int, metric_id: int, region_id: int, sub_update: SubscriptionUpdate) -> Optional[Subscriptions]:
+        subscription = await self.get_by_ids(user_id, metric_id, region_id)
+        if not subscription:
+            return None
 
-    def delete(self, user_id: int, region_id: int, metric_id: int) -> bool:
-        sub = self.get_by_id(user_id, region_id, metric_id)
-        if sub:
-            self.db.delete(sub)
-            self.commit()
-            return True
-        return False
+        update_data = sub_update.model_dump(exclude_unset=True)
+        if update_data:
+            stmt = (update(Subscriptions).where(
+                    Subscriptions.user_id == user_id,
+                    Subscriptions.metric_id == metric_id,
+                    Subscriptions.region_id == region_id
+                ).values(**update_data)
+            )
+            await self.db.execute(stmt)
+            await self.commit()
+            await self.refresh(subscription)
+        return subscription
 
+    async def delete(self, user_id: int, metric_id: int, region_id: int) -> bool:
+        subscription = await self.get_by_ids(user_id, metric_id, region_id)
+        if not subscription:
+            return False
+        await self.db.delete(subscription)
+        await self.commit()
+        return True
 
 class LCTRepository(BaseRepository):
     """Repository for LandCoverTypes operations."""

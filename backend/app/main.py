@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, UTC
 from sqlalchemy import text
 from .database import get_db
-from .routers import users, regions # TODO: , reports, subscriptions, pending_updates, time_periods, metrics, etc.
+from .routers import users, regions, subscriptions # TODO: , reports, pending_updates, time_periods, metrics, etc.
 import uvicorn
 
 app = FastAPI(

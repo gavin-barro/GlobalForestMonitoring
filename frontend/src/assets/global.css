@@ -1,0 +1,198 @@
+/* Define styles intended for use globally in app */
+/* Content pulled from VT CS 5244 course */
+:root {
+  --title-font-family: "Averia Serif Libre", serif;
+  --default-font-family: "Averia Serif Libre", serif;
+  --alt-font-family: "Noto Serif", serif;
+
+  --default-font-size: 1.25rem;
+  --default-text-color: #111;
+  --hover-text-color: white;
+  --neutral-color: #6D8196;
+
+  --primary-color: #CBEBCC;
+  --primary-color-dark: #19B24C;
+  --accent-color: #19B24C;
+  --offwhite: #f2f0ef;
+
+  --primary-background-color: #708090;
+  --secondary-background-color: var(--offwhite);
+  --card-background-color: white;
+}
+
+/* RESET */
+
+.text-icon {
+  display: inline-block;
+}
+
+/*
+  In CSS, margins can be a pain to work with. One of the reasons for this
+  is that top and bottom margins collapse into one another. For example,
+  if you have one paragraph following another and they both have top
+  and bottom margins of 1em, the space between them will be... 1em.
+  It will not be 2em as you might think. To get around this odd behavior,
+  many developers choose to set all margins on paragraph elements to 0
+  and fix problems as they arise.
+*/
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* For large text sizes, you typically want to decrease your line height. */
+h1,
+h2,
+h3 {
+  line-height: 1;
+}
+
+/* For small text sizes, you typically want to increase your line height. */
+p {
+  line-height: 1.5;
+}
+
+/* Get rid of styling (numbers, bullets, and spacing) for lists. */
+ol,
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/*
+  By default, a width refers to the width of the content box.
+  This causes unexpected behavior in many situations. The following
+  rule makes width refer to the width of the border box.
+  See the box model (content/padding/border/margin) for details.
+*/
+* {
+  box-sizing: border-box;
+}
+
+/*
+  This rule ensures that all images stretch to fit the width
+  of the parent element, and all images start on a new line.
+  A height of auto will ensure the aspect ratio is preserved.
+*/
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/*
+  In general, font properties of elements are inherited from
+  the parent element, and layout properties of elements are NOT inherited
+  from the parent element. An exception to this convention involves elements
+  that are associated with forms (like button and input). This rule fixes
+  that oversight in the CSS specification, and ensures that form elements
+  also inherit font properties from their parent element.
+
+  For details, see https://www.youtube.com/watch?v=qKiz9gdJdr8&t=49s.
+*/
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+input {
+  width: 100%;
+  display: block;
+}
+
+/* UTILITY CLASSES */
+
+/*
+  When you get rid of margins, everything is crammed together. For example,
+  paragraphs will have no space between them, which is NOT good design.
+  The following utility class gives a top margin of 1.25rem (20px)
+  to all children inside a parent with class .flow-content,
+  EXCEPT for the first child, which will NOT get a margin.
+  That's because "elem + elem" means that the rule should be applied
+  to the first elem only when it is followed by another elem.
+*/
+.flow-content > * + * {
+  margin-top: 1rem;
+}
+
+/*
+  Giving various sections of your page this utility class
+  will ensure a nice padding around the contents.
+*/
+.container {
+  padding: 1rem;
+}
+
+/*
+  Sometimes it's nice to have a section where the foreground
+  and background colors are (more-or-less) flipped for contrast.
+  This utility class does that.
+*/
+.dark-background {
+  background-color: var(--neutral-color);
+  color: whitesmoke;
+}
+
+/* LAYOUT */
+
+/* These global font properties with be inherited by child elements. */
+body {
+  background: var(--secondary-background-color);
+  color: var(--default-text-color);
+  font-family: var(--default-font-family);
+  font-size: var(--default-font-size);
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+}
+
+/* BUTTONS */
+
+/*
+  These rules gives simplistic styles for buttons inside and outside of forms.
+  A richer web site will likely have multiple styles that are defined
+  by multiple classes. At a minimum, you might have class .primary-button
+  and .secondary-button.
+*/
+
+.button,
+.button:visited {
+  display: inline-block;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  cursor: pointer;
+}
+
+.button:hover,
+.button:active {
+  background: var(--primary-color-dark);
+  color: white;
+}
+
+/* LINKS */
+
+/*
+  Some developers choose to make links look like buttons. Technically,
+  links are things you click on that take you to another page, and buttons
+  are things you click on that perform some action (like adding a product
+  to the shopping cart), but the line has become somewhat blurred.
+*/
+
+a,
+a:visited {
+  color: var(--default-text-color);
+}
+
+a:hover,
+a:active {
+  color: var(--hover-text-color);
+}

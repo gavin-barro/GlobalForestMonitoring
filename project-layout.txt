@@ -6,7 +6,6 @@ global-forest-watch/
 │   │   ├── database.py
 │   │   ├── models.py
 │   │   ├── schemas.py
-│   │   ├── crud.py
 │   │   ├── dependencies.py
 │   │   ├── routers/
 │   │   │   ├── init.py

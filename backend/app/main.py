@@ -28,8 +28,8 @@ app.add_middleware(
 # TODO: add all the routers
 app.include_router(users.router)
 app.include_router(regions.router)
+app.include_router(subscriptions.router)
 # app.include_router(reports.router)
-# app.include_router(subscriptions.router)
 # app.include_router(pending_updates.router)
 # app.include_router(time_periods.router)
 # app.include_router(metrics.router)

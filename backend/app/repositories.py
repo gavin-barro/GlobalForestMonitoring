@@ -1,73 +1,86 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select, update, delete
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from app.models import (
+
+from .models import (
     Users, Metrics, TimePeriods, LandCoverTypes,
     Regions, ForestObservations, Subscriptions,
     RegionClassification, PendingUpdates
 )
 
-from app.schemas import (
-    FOCreate, FOUpdate, UserCreate, UserUpdate, 
-    RegionCreate, RegionUpdate, MetricCreate, MetricUpdate, 
-    SubscriptionCreate, SubscriptionUpdate, LCTCreate, LCTUpdate,
-    TPCreate, TPUpdate, PUCreate, PUUpdate, RCCreate
+from .schemas import (
+    UserCreate, UserUpdate, RegionCreate, RegionUpdate,
+    MetricCreate, MetricUpdate, SubscriptionCreate, SubscriptionUpdate,
+    LCTCreate, LCTUpdate, TPCreate, TPUpdate, PUCreate, PUUpdate, RCCreate,
+    FOCreate, FOUpdate
 )
 
 
 class BaseRepository:
     """Base repository with common database operations."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def commit(self):
+    async def commit(self):
         """Commit changes to database."""
-        self.db.commit()
+        await self.db.commit()
 
-    def refresh(self, obj):
+    async def refresh(self, obj):
         """Refresh object from database."""
-        self.db.refresh(obj)
+        await self.db.refresh(obj)
 
 
 class UserRepository(BaseRepository):
     """Repository for User operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Users]:
-        return self.db.query(Users).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Users]:
+        sql_statement = select(Users).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def get_by_id(self, user_id: int) -> Optional[Users]:
-        return self.db.query(Users).filter(Users.user_id == user_id).first()
+    async def get_by_id(self, user_id: int) -> Optional[Users]:
+        sql_statement = select(Users).where(Users.user_id == user_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_username(self, username: str) -> Optional[Users]:
-        return self.db.query(Users).filter(Users.username == username).first()
+    async def get_by_username(self, username: str) -> Optional[Users]:
+        sql_statement = select(Users).where(Users.username == username)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_email(self, email: str) -> Optional[Users]:
-        return self.db.query(Users).filter(Users.email == email).first()
+    async def get_by_email(self, email: str) -> Optional[Users]:
+        sql_statement = select(Users).where(Users.email == email)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def create(self, user_data: UserCreate) -> Users:
+    async def create(self, user_data: UserCreate) -> Users:
         user = Users(**user_data.model_dump())
         self.db.add(user)
-        self.commit()
-        self.refresh(user)
+        await self.commit()
+        await self.refresh(user)
         return user
 
-    def update(self, user_id: int, user_update: UserUpdate) -> Optional[Users]:
-        user = self.get_by_id(user_id)
-        if user:
-            user_data = user_update.model_dump(exclude_unset=True)
-            for key, value in user_data.items():
-                setattr(user, key, value)
-            self.commit()
-            self.refresh(user)
+    async def update(self, user_id: int, user_update: UserUpdate) -> Optional[Users]:
+        user = await self.get_by_id(user_id)
+        if not user:
+            return None
+
+        update_data = user_update.model_dump(exclude_unset=True)
+        if update_data:
+            sql_statement = (update(Users).where(Users.user_id == user_id).values(**update_data))
+            await self.db.execute(sql_statement)
+            await self.commit()
+            await self.refresh(user)
         return user
 
-    def delete(self, user_id: int) -> bool:
-        user = self.get_by_id(user_id)
-        if user:
-            self.db.delete(user)
-            self.commit()
-            return True
-        return False
+    async def delete(self, user_id: int) -> bool:
+        user = await self.get_by_id(user_id)
+        if not user:
+            return False
+        await self.db.delete(user)
+        await self.commit()
+        return True
 
 
 class RegionRepository(BaseRepository):

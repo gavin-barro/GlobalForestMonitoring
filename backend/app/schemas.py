@@ -126,7 +126,7 @@ class FOUpdate(BaseModel):
     fo_region_id: Optional[int]
 
 class FOResponse(FOBase):
-    fo_pending_updates = Optional[List[int]]
+    fo_pending_updates: Optional[List[int]] = None
 
 # TimePeriod Schemas
 class TPBase(BaseModel):

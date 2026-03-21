@@ -1,6 +1,8 @@
 bcrypt
 fastapi
 uvicorn[standard]
-sqlalchemy[postgresql]
+sqlalchemy[asyncio, postgresql]
+pydantic[email]
 python-dotenv
 passlib
+asyncpg

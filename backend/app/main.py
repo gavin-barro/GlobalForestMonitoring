@@ -1,16 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, UTC
+from sqlalchemy import text
+from .database import get_db
+from .routers import users, regions # TODO: , reports, subscriptions, pending_updates, time_periods, metrics, etc.
 import uvicorn
-# from .database import get_db, engine, etc.  TODO
-from .routers import users # TODO: regions, reports, subscriptions, pending_updates, time_periods, metrics, etc.
 
 app = FastAPI(
     title = "Global Forest Watch Database System",
     description = "CS 5614 Database Management Final Project - Backend",
     version = "0.1.0",
     docs_url = "/docs",          
-    redoc_url = "/redoc",   
+    redoc_url = "/redoc",  
+    debug=True 
 )
 
 app.add_middleware(
@@ -23,7 +27,7 @@ app.add_middleware(
 
 # TODO: add all the routers
 app.include_router(users.router)
-# app.include_router(regions.router)
+app.include_router(regions.router)
 # app.include_router(reports.router)
 # app.include_router(subscriptions.router)
 # app.include_router(pending_updates.router)
@@ -40,15 +44,49 @@ async def root():
         "docs": "/docs"
     }
 
-# DB (railway) health check 
-@app.get("/health", tags = ["Health"])
-async def health_check():
-    # TODO: make it so we check here if we are connected to the db
-    return JSONResponse(
-        content = {"status": "healthy", "database": "not connected yet"},
-        status_code = 200
-    )
-
+@app.get("/health", tags=["Health"])
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """
+    
+    Health check endpoint that verifies:
+        - API is running
+        - Database connection is active (tries a simple SELECT 1)
+    Returns detailed status for monitoring/debugging.
+    
+    """
+    try:
+        # Simple query to test DB connection (async)
+        result = await db.execute(text("SELECT 1"))
+        db_ok = result.scalar() == 1
+        
+        return JSONResponse(
+            content={
+                "status": "healthy",
+                "api": "online",
+                "database": "connected" if db_ok else "disconnected",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "details": {
+                    "db_response": "SELECT 1 succeeded" if db_ok else "failed"
+                }
+            },
+            status_code=200
+        )
+    
+    except Exception as e:
+        # Catch connection errors, timeouts, auth failures, etc.
+        error_msg = str(e)
+        status_code = 503 if "connect" in error_msg.lower() or "timeout" in error_msg.lower() else 500
+        
+        return JSONResponse(
+            content={
+                "status": "unhealthy",
+                "api": "online",
+                "database": "disconnected",
+                "error": error_msg,
+                "timestamp": datetime.now(UTC).isoformat()
+            },
+            status_code=status_code
+        )
 
 # Test api route
 @app.get("/api/hello", tags = ["General"])

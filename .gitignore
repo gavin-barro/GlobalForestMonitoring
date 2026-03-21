@@ -1,3 +1,4 @@
 .env
 .DS_Store
 # project-layout.txt
+__pycache__

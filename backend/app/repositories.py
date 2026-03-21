@@ -86,39 +86,48 @@ class UserRepository(BaseRepository):
 class RegionRepository(BaseRepository):
     """Repository for Region operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Regions]:
-        return self.db.query(Regions).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Regions]:
+        sql_statement = select(Regions).offset(skip).limit(limit)
+        result = await self.db.execute(sql_statement)
+        return result.scalars().all()
 
-    def get_by_id(self, region_id: int) -> Optional[Regions]:
-        return self.db.query(Regions).filter(Regions.region_id == region_id).first()
+    async def get_by_id(self, region_id: int) -> Optional[Regions]:
+        sql_statement = select(Regions).where(Regions.region_id == region_id)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def get_by_region_name(self, region_name: str) -> Optional[Regions]:
-        return self.db.query(Regions).filter(Regions.region_name == region_name).first()
+    async def get_by_region_name(self, region_name: str) -> Optional[Regions]:
+        sql_statement = select(Regions).where(Regions.region_name == region_name)
+        result = await self.db.execute(sql_statement)
+        return result.scalar_one_or_none()
 
-    def create(self, region_data: RegionCreate) -> Regions:
+    async def create(self, region_data: RegionCreate) -> Regions:
         region = Regions(**region_data.model_dump())
         self.db.add(region)
-        self.commit()
-        self.refresh(region)
+        await self.commit()
+        await self.refresh(region)
         return region
 
-    def update(self, region_id: int, region_update: RegionUpdate) -> Optional[Regions]:
-        region = self.get_by_id(region_id)
-        if region:
-            region_data = region_update.model_dump(exclude_unset=True)
-            for key, value in region_data.items():
-                setattr(region, key, value)
-            self.commit()
-            self.refresh(region)
+    async def update(self, region_id: int, region_update: RegionUpdate) -> Optional[Regions]:
+        region = await self.get_by_id(region_id)
+        if not region:
+            return None
+
+        update_data = region_update.model_dump(exclude_unset=True)
+        if update_data:
+            sql_statement = (update(Regions).where(Regions.region_id == region_id).values(**update_data))
+            await self.db.execute(sql_statement)
+            await self.commit()
+            await self.refresh(region)
         return region
 
-    def delete(self, region_id: int) -> bool:
-        region = self.get_by_id(region_id)
-        if region:
-            self.db.delete(region)
-            self.commit()
-            return True
-        return False
+    async def delete(self, region_id: int) -> bool:
+        region = await self.get_by_id(region_id)
+        if not region:
+            return False
+        await self.db.delete(region)
+        await self.commit()
+        return True
 
 
 class MetricRepository(BaseRepository):

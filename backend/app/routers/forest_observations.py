@@ -35,15 +35,15 @@ async def get_fo(fo_id: int, db: AsyncSession = Depends(get_db)):
     return fo
 
 
-@router.get("/by_region/{region_id}", response_model=FOResponse)
-async def get_fo(region_id: int, db: AsyncSession = Depends(get_db)):
+@router.get("/by_region/{region_id}", response_model=List[FOResponse])
+async def get_fos_by_region(region_id: int, db: AsyncSession = Depends(get_db)):
     """
         Retrieve a list of forest observations based on the regions id
         Returns 404 if fo does not exist
     """
     repo = FORepository(db)
     fos = await repo.get_by_region_id(region_id)
-    if fos is None:
+    if not fos:
         raise HTTPException(status_code=404, detail="forest observation not found in region")
     return fos
 
@@ -56,15 +56,6 @@ async def create_fo(fo_data: FOCreate, db: AsyncSession = Depends(get_db)):
         - source date must be valid datetime before time.now() (TODO: implement date checking)
     """
     repo = FORepository(db)
-
-    # Basic uniqueness check before insert -- technicly option but improves error message in case or error
-    existing = await repo.get_by_metric_name(fo_data.metricname)
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Forest Observation already exists"
-        )
-
     new_fo = await repo.create(fo_data)
     return new_fo
 

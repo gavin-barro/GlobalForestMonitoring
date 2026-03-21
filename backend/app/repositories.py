@@ -290,7 +290,7 @@ class FORepository(BaseRepository):
         return result.scalars().all()
     
     async def get_by_id(self, fo_id: int) -> Optional[ForestObservations]:
-        sql_statement = select(ForestObservations).where(ForestObservations.fo_id == fo_id)
+        sql_statement = select(ForestObservations).where(ForestObservations.observation_id == fo_id)
         result = await self.db.execute(sql_statement)
         return result.scalar_one_or_none()
 
@@ -313,7 +313,7 @@ class FORepository(BaseRepository):
 
         update_data = fo_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(ForestObservations).where(ForestObservations.fo_id == fo_id).values(**update_data))
+            sql_statement = (update(ForestObservations).where(ForestObservations.observation_id == fo_id).values(**update_data))
             await self.db.execute(sql_statement)
             await self.commit()
             await self.refresh(fo)
@@ -337,12 +337,12 @@ class TPRepository(BaseRepository):
         return result.scalars().all()
     
     async def get_by_id(self, tp_id: int) -> Optional[TimePeriods]:
-        sql_statement = select(TimePeriods).where(TimePeriods.tp_id == tp_id)
+        sql_statement = select(TimePeriods).where(TimePeriods.period_id == tp_id)
         result = await self.db.execute(sql_statement)
         return result.scalar_one_or_none()
 
     async def get_by_tp_name(self, tp_name: str) -> Optional[TimePeriods]:
-        sql_statement = select(TimePeriods).where(TimePeriods.tp_name == tp_name)
+        sql_statement = select(TimePeriods).where(TimePeriods.period_name == tp_name)
         result = await self.db.execute(sql_statement)
         return result.scalar_one_or_none()
 
@@ -360,7 +360,7 @@ class TPRepository(BaseRepository):
 
         update_data = tp_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(TimePeriods).where(TimePeriods.tp_id == tp_id).values(**update_data))
+            sql_statement = (update(TimePeriods).where(TimePeriods.period_id == tp_id).values(**update_data))
             await self.db.execute(sql_statement)
             await self.commit()
             await self.refresh(tp)

@@ -36,7 +36,7 @@ async def get_tp(tp_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/by_name/{tp_name}", response_model=TPResponse)
-async def get_tp(tp_name: int, db: AsyncSession = Depends(get_db)):
+async def get_tp(tp_name: str, db: AsyncSession = Depends(get_db)):
     """
         Retrieve a list of Time Periods based on the regions id
         Returns 404 if tp does not exist
@@ -57,7 +57,7 @@ async def create_tp(tp_data: TPCreate, db: AsyncSession = Depends(get_db)):
     repo = TPRepository(db)
 
     # Basic uniqueness check before insert -- technicly option but improves error message in case or error
-    existing = await repo.get_by_metric_name(tp_data.metricname)
+    existing = await repo.get_by_tp_name(tp_data.period_name)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

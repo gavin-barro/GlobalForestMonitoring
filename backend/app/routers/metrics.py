@@ -56,7 +56,7 @@ async def create_metric(metric_data: MetricCreate, db: AsyncSession = Depends(ge
     repo = MetricRepository(db)
 
     # Basic uniqueness check before insert -- technicly option but improves error message in case or error
-    existing = await repo.get_by_metric_name(metric_data.metricname)
+    existing = await repo.get_by_metric_name(metric_data.metric_name)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

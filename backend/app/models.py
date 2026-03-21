@@ -60,7 +60,7 @@ class Regions(Base):
     region_name = Column(String(150), unique=True, index=True, nullable=False)
     region_type = Column(String(50), nullable=False)
     geo_boundary = Column(String, nullable=True)
-    parent_region_id = Column(Integer, ForeignKey("regions.region_id"), nullable=True)
+    parent_region_id = Column('parent_region', Integer, ForeignKey("regions.region_id"), nullable=True)
 
     # Self-referencing backprop
     parent = relationship("Regions", remote_side=[region_id], back_populates="sub_regions")
@@ -78,9 +78,9 @@ class ForestObservations(Base):
     value = Column(Float, nullable=False)
     source_date = Column(Date, nullable=False)
     
-    period_id = Column(Integer, ForeignKey("time_periods.period_id"), nullable=False)
-    metric_id = Column(Integer, ForeignKey("metrics.metric_id"), nullable=False)
-    region_id = Column(Integer, ForeignKey("regions.region_id"), nullable=False)
+    period_id = Column('observation_period_id', Integer, ForeignKey("time_periods.period_id"), nullable=False)
+    metric_id = Column('observation_metric', Integer, ForeignKey("metrics.metric_id"), nullable=False)
+    region_id = Column('describing_region_id', Integer, ForeignKey("regions.region_id"), nullable=False)
 
     # Back populations
     period = relationship("TimePeriods", back_populates="observations")
@@ -123,7 +123,7 @@ class PendingUpdates(Base):
     
     approving_admin_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     submitting_user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-    observation_id = Column(Integer, ForeignKey("forest_observations.observation_id"), nullable=True)
+    observation_id = Column('forest_observation_id', Integer, ForeignKey("forest_observations.observation_id"), nullable=True)
 
     # Back populations
     approving_admin = relationship("Users", foreign_keys=[approving_admin_id], back_populates="approved_updates")

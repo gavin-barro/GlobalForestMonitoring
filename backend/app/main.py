@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, UTC
 from sqlalchemy import text
-from database import get_db
-from routers import users, regions, subscriptions # TODO: , reports, pending_updates, time_periods, metrics, etc.
+from .database import get_db
+from .routers import users, regions, metrics, time_periods, subscriptions, forest_observations # TODO: , reports, pending_updates, time_periods, metrics, etc.
 import uvicorn
 
 app = FastAPI(
@@ -31,8 +31,9 @@ app.include_router(regions.router)
 app.include_router(subscriptions.router)
 # app.include_router(reports.router)
 # app.include_router(pending_updates.router)
-# app.include_router(time_periods.router)
-# app.include_router(metrics.router)
+app.include_router(time_periods.router)
+app.include_router(metrics.router)
+app.include_router(forest_observations.router)
 
 # Root endpoint - Test 
 @app.get("/", tags = ["General"])

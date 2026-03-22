@@ -1,16 +1,8 @@
-# bcrypt
-# fastapi
-# uvicorn[standard]
-# sqlalchemy[asyncio, postgresql]
-# pydantic[email]
-# python-dotenv
-# passlib
-# asyncpg
-
 bcrypt==4.2.1
 fastapi==0.115.12
 uvicorn[standard]==0.34.0
 sqlalchemy[asyncio]==2.0.40
+psycopg==3.3.3
 psycopg2-binary==2.9.10
 pydantic[email]==2.11.1
 python-dotenv==1.1.0

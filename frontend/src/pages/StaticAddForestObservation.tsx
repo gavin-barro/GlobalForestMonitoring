@@ -37,7 +37,9 @@ export default function StaticAddForestObservationPage() {
     }
     const measurements = [
         {value: 1, label: 'Tree Coverage'},
-        {value: 2, label: 'Emission Total'}
+        {value: 2, label: 'Emission Total'},
+        {value: 3, label: 'Metric 3'},
+        {value: 4, label: 'Metric 4'}
     ]
 
     const regions = [
@@ -50,7 +52,10 @@ export default function StaticAddForestObservationPage() {
     const timeperiods = [
         {value: 1, label: '2024-2025'},
         {value: 2, label: '2023-2024'},
-        {value: 3, label: '2020-2022'}
+        {value: 3, label: '2020-2022'},
+        {value: 4, label: 'Period 4'},
+        {value: 5, label: 'Period 5'},
+        {value: 6, label: 'Period 6'}
     ]
 
     return (

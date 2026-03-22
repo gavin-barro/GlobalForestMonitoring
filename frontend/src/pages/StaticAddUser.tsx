@@ -4,6 +4,7 @@ import TextInput from "../components/form/TextInput";
 import type { ServerErrorResponse, UserFormBackend, UserResponse } from "../types";
 import { requestNewUser } from "../services";
 import { useNavigate } from "react-router-dom";
+import { generateRandomId } from "../utils";
 
 const initialValues: UserFormBackend = {
     user_id: 0,
@@ -18,7 +19,7 @@ export default function StaticAddUserPage() {
     const navigate = useNavigate();
     const handleSubmit = async (values: UserFormBackend) => {
         const today = format(new Date(), "yyyy-MM-dd");
-        const user_id = Math.floor(Math.random() * 100) + 1;
+        const user_id = generateRandomId(100);
 
         console.log("Received user as the following from frontend: " + JSON.stringify(values, null, 2));
 

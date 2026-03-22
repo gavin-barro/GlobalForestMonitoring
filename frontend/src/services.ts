@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ServerErrorResponse, UserFormBackend, UserResponse } from './types';
+import type { RegionFormBackend, RegionResponse, ServerErrorResponse, UserFormBackend, UserResponse } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -14,6 +14,26 @@ export async function requestNewUser (userForm: UserFormBackend): Promise<UserRe
   try {
     const response: AxiosResponse<UserResponse> = await axios.post(
       `${apiUrl}/users/`,
+      userForm
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      // Handle non-200 status codes
+      const serverErrorResponse: ServerErrorResponse = error.response.data;
+      return serverErrorResponse;
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}
+
+/* Request to create a new region */
+export async function requestNewRegion (userForm: RegionFormBackend): Promise<RegionResponse | ServerErrorResponse> {
+  try {
+    const response: AxiosResponse<RegionResponse> = await axios.post(
+      `${apiUrl}/regions/`,
       userForm
     );
 

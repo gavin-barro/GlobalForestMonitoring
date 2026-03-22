@@ -1,10 +1,4 @@
-export interface UserForm {
-    username: string,
-    email: string,
-    account_type: string,
-    password: string
-}
-
+// USER
 // TODO: The backend should be modified to accept UserForm and intuit the other fields
 export interface UserFormBackend {
     user_id: number;
@@ -16,14 +10,29 @@ export interface UserFormBackend {
 }
 
 export interface UserResponse {
-  id: string;
-  username: string;
-  email: string;
+    id: string;
+    username: string;
+    email: string;
 }
 
+// REGION
+export interface RegionFormBackend {
+    region_id: number;
+    region_name: string;
+    region_type: string;
+    geo_boundary: string;
+    parent_region_id: number;
+}
+
+export interface RegionResponse {
+    id: string;
+    region_name: string;
+}
+
+// GENERIC
 export interface ServerErrorResponse {
-  reason: string;
-  message: string;
-  fieldName: string;
-  error: boolean;
+    reason: string;
+    message: string;
+    fieldName: string;
+    error: boolean;
 }

@@ -186,6 +186,10 @@ class PUResponse(PUBase):
         from_attributes = True
 
 # RegionClassification Schemas
+
+class RegionCreate(RegionBase):
+    parent_region_id: Optional[int] = None
+
 class RCBase(BaseModel):
     lct_id: int
     region_id: int

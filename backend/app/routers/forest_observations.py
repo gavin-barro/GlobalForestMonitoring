@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from typing import List
 from ..schemas import FOCreate, FOUpdate, FOResponse
 from ..database import get_db
@@ -50,14 +51,15 @@ async def get_fos_by_region(region_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/", response_model=FOResponse, status_code=status.HTTP_201_CREATED)
 async def create_fo(fo_data: FOCreate, db: AsyncSession = Depends(get_db)):
-    """
-    Create a new forest observation:
-        - region_id, metric_id and period_id must be existing and valid (TODO: implement error raising for non-existing ids.)
-        - source date must be valid datetime before time.now() (TODO: implement date checking)
-    """
-    repo = FORepository(db)
-    new_fo = await repo.create(fo_data)
-    return new_fo
+    repository = FORepository(db)
+    try:
+        new_forest_observation = await repository.create(fo_data)
+        return new_forest_observation
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A forest observation for this region, period, and metric already exists"
+        )
 
 
 @router.patch("/{fo_id}", response_model=FOResponse)

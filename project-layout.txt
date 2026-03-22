@@ -52,4 +52,5 @@ global-forest-watch/
 │   ├── package.json
 │   └── .env
 │
+├── run.sh
 └── README.md

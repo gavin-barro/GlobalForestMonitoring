@@ -6,9 +6,10 @@ export interface UserFormBackend {
     email: string;
     acct_type: 'Admin' | 'Researcher' | 'Subscriber' | 'Guest';
     pw_hash: string;
-    creation_date: string; // YYYY-MM-DD
+    creation_date: string;
 }
 
+// TODO: Match db expected response
 export interface UserResponse {
     id: string;
     username: string;
@@ -24,9 +25,25 @@ export interface RegionFormBackend {
     parent_region_id: number;
 }
 
+// TODO: Match db expected response
 export interface RegionResponse {
     id: string;
     region_name: string;
+}
+
+// FOREST OBSERVATION
+export interface ForestObservationFormBackend {
+    value: number;
+    source_date: string;
+    period_id: number;
+    metric_id: number;
+    region_id: number;
+}
+
+// TODO: Match db expected response
+export interface ForestObservationResponse {
+    id: number;
+    value: number;
 }
 
 // GENERIC

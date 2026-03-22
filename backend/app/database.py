@@ -28,7 +28,7 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_
 class Base(DeclarativeBase):
     pass
 
-async def get_db() -> AsyncGenerator[Optional[AsyncSession]]:
+async def get_db() -> AsyncGenerator[Optional[AsyncSession], None]:
     """
         FastAPI dependency: returns an async DB session per request
     """

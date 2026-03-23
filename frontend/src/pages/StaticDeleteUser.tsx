@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { getAllUsers, requestDeleteUser } from "../services";
 import type { UserGet } from "../types";
-import "./StaticDeleteUser.css"
+import "./common.css"
 
 export default function StaticDeleteUserPage() {
     const [users, setUsers] = useState<UserGet[]>([]);
 
     useEffect(() => {
         getAllUsers()
-        .then((result) => setUsers(result));
+            .then((result) => setUsers(result));
     }, []);
 
     const handleDelete = async (id: number) => {
@@ -25,9 +25,9 @@ export default function StaticDeleteUserPage() {
         <div className="page">
             <div className="input-card">
                 <h1 className="card-header">Manage Users</h1>
-                <div className="users-container">
+                <div className="list-container">
                 {users.map((user) => (
-                    <div className="user-entry" key={user.user_id}>
+                    <div className="list-entry" key={user.user_id}>
                         <div className="user-account-type">
                             {user.acct_type}
                         </div>

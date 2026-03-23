@@ -44,3 +44,22 @@ select {
   margin-left: .5em;
   border-radius: 5px;
 }
+
+
+/* List driven pages: i.e. delete pages */
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: .25em;
+
+    max-height: 18em;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-right: .5em;
+}
+
+.list-entry {
+    padding: .25em .75em;
+    background-color: white;
+    border-radius: 5px;
+}

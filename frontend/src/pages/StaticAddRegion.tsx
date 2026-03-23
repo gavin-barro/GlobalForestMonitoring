@@ -1,32 +1,37 @@
-import { Form, Formik } from "formik";
+import { Form, Formik, type FormikHelpers } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
 import "./common.css"
 import type { Region, RegionResponse, ServerErrorResponse } from "../types";
-import { useNavigate } from "react-router-dom";
-import { requestNewRegion } from "../services";
-import { generateRandomId } from "../utils";
+import { getAllRegions, requestNewRegion } from "../services";
+import { useEffect, useState } from "react";
+import "./StaticAddRegion.css"
 
 const initialValues: Region = {
     region_id: 0,
     region_name: "",
     region_type: "Country",
     geo_boundary: "",
-    parent_region_id: 3
+    parent_region_id: 1
 }
 
 export default function StaticAddRegionPage() {
-    const navigate = useNavigate();
-    const handleSubmit = async (values: Region) => {
-        const region_id = generateRandomId(1000);
+    const [parentRegions, setParentRegions] = useState<Region[]>([]);
+
+    useEffect(() => {
+        getAllRegions()
+            .then((result) => setParentRegions(result))
+    }, []);
+
+    const handleSubmit = async (values: Region, { resetForm }: FormikHelpers<Region>) => {
         console.log("Received region as the following from frontend: " + JSON.stringify(values, null, 2));
 
         const newRegion: Region = {
-            region_id: region_id,
+            region_id: values.region_id, // TODO: Since db creates this ideally we wouldn't provide anything here
             region_name: values.region_name,
-            region_type: "Country", // TODO: Pull from get request of valid types or add field
+            region_type: "Country", // TODO: Pull from get request of valid types or add field for region type
             geo_boundary: values.geo_boundary,
-            parent_region_id: values.parent_region_id // TODO: Pull from get request of valid regions
+            parent_region_id: values.parent_region_id
         }
 
         console.log("Passing user as the following to backend: " + JSON.stringify(newRegion, null, 2));
@@ -35,16 +40,17 @@ export default function StaticAddRegionPage() {
         if ("error" in requestRegionResponse) {
             console.log("Error creating new user account", requestRegionResponse);
         } else {
-            navigate("/");
+            // Don't know which id db will assign region, so refetch region list
+            const updatedRegions = await getAllRegions();
+            setParentRegions(updatedRegions);
+            resetForm()
         }
     }
 
-    const regions = [
-        {value: 1, label: 'Virginia, USA'},
-        {value: 2, label: 'North Carolina, USA'},
-        {value: 3, label: 'USA'},
-        {value: 4, label: 'Russia'}
-    ]
+    const regions = parentRegions.map(region => ({
+        value: region.region_id,
+        label: region.region_name
+    }));
 
     return (
         <div className="page">
@@ -57,7 +63,7 @@ export default function StaticAddRegionPage() {
                     <Form>
                         <TextInput label="Region Name" name="region_name" />
                         <label htmlFor="parent">Parent Region:</label>
-                        <div className="input-option">
+                        <div className="input-option region-parent-select">
                             <SelectInput label="" name="parent_region_id" options={regions} />
                         </div>
                         <TextInput label="GeoJSON Data" name="geo_boundary" />

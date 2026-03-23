@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationResponse, RegionFormBackend, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
+import type { ForestObservationFormBackend, ForestObservationResponse, Region, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -10,9 +10,19 @@ import type { ForestObservationFormBackend, ForestObservationResponse, RegionFor
 const apiUrl = "http://localhost:8000"
 
 // GET
+/* Retrieve all users from the db */
 export const getAllUsers = async(): Promise<UserGet[]> => {
     const response: AxiosResponse<UserGet[]> = await axios.get(
       `${apiUrl}/users/`
+    );
+
+    return response.data;
+}
+
+/* Retrieve all Regions from the db */
+export const getAllRegions = async(): Promise<Region[]> => {
+    const response: AxiosResponse<Region[]> = await axios.get(
+      `${apiUrl}/regions/`
     );
 
     return response.data;
@@ -41,7 +51,7 @@ export async function requestNewUser (userForm: UserFormBackend): Promise<UserRe
 }
 
 /* Request to create a new region */
-export async function requestNewRegion (userForm: RegionFormBackend): Promise<RegionResponse | ServerErrorResponse> {
+export async function requestNewRegion (userForm: Region): Promise<RegionResponse | ServerErrorResponse> {
   try {
     const response: AxiosResponse<RegionResponse> = await axios.post(
       `${apiUrl}/regions/`,

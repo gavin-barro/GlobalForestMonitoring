@@ -82,18 +82,14 @@ export async function requestNewForestObservation (userForm: ForestObservationFo
 
 // DELETE
 /* Delete a user */
-export async function requestDeleteUser (user_id: number): Promise<UserResponse | ServerErrorResponse> {
+export async function requestDeleteUser (user_id: number): Promise<Boolean> {
   try {
-    const response: AxiosResponse<UserResponse> = await axios.delete(
-      `${apiUrl}/users/${user_id}`
-    );
+    await axios.delete(`${apiUrl}/users/${user_id}`);
 
-    return response.data;
+    return true;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      // Handle non-200 status codes
-      const serverErrorResponse: ServerErrorResponse = error.response.data;
-      return serverErrorResponse;
+      return false;
     } else {
       throw new Error("An unexpected error occurred");
     }

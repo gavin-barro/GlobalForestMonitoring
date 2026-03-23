@@ -1,9 +1,10 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
-import type { ForestObservationFormBackend, ForestObservationResponse, ServerErrorResponse } from "../types";
+import type { ForestObservationFormBackend, ForestObservationResponse, Region, ServerErrorResponse } from "../types";
 import { useNavigate } from "react-router-dom";
-import { requestNewForestObservation } from "../services";
+import { getAllRegions, requestNewForestObservation } from "../services";
+import { useEffect, useState } from "react";
 
 const initialValues: ForestObservationFormBackend = {
     value: 0,
@@ -14,7 +15,13 @@ const initialValues: ForestObservationFormBackend = {
 }
 
 export default function StaticAddForestObservationPage() {
-    const navigate = useNavigate();
+    const [availableRegions, setAvailableRegions] = useState<Region[]>([]);
+
+    useEffect(() => {
+        getAllRegions()
+            .then((result) => setAvailableRegions(result))
+    }, []);
+
     const handleSubmit = async (values: ForestObservationFormBackend) => {
         console.log("Received forest observation as the following from frontend: " + JSON.stringify(values, null, 2));
 
@@ -31,8 +38,6 @@ export default function StaticAddForestObservationPage() {
             await requestNewForestObservation(newForestObservation);
         if ("error" in requestForestObservationResponse) {
             console.log("Error creating new user account", requestForestObservationResponse);
-        } else {
-            navigate("/");
         }
     }
     const measurements = [
@@ -42,12 +47,10 @@ export default function StaticAddForestObservationPage() {
         {value: 4, label: 'Metric 4'}
     ]
 
-    const regions = [
-        {value: 1, label: 'Virginia, USA'},
-        {value: 2, label: 'North Carolina, USA'},
-        {value: 3, label: 'USA'},
-        {value: 4, label: 'Russia'}
-    ]
+    const regions = availableRegions.map(region => ({
+        value: region.region_id,
+        label: region.region_name
+    }));
 
     const timeperiods = [
         {value: 1, label: '2024-2025'},
@@ -80,7 +83,7 @@ export default function StaticAddForestObservationPage() {
                             <SelectInput label="" name="period_id" options={timeperiods} />
                         </div>
                         <TextInput label="With Value" name="value" type="number"/>
-                        <TextInput label="On Date" name="source_date" />
+                        <TextInput label="On Date" name="source_date" type="date"/>
 
                         <button type="submit" className="button">
                             {'Submit'}

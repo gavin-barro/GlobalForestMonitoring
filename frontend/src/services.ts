@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
+import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, RegionResponse, ServerErrorResponse, TimePeriod, UserFormBackend, UserGet, UserResponse } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -10,32 +10,19 @@ import type { ForestObservationFormBackend, ForestObservationResponse, Metric, R
 const apiUrl = "http://localhost:8000"
 
 // GET
-/* Retrieve all users from the db */
-export const getAllUsers = async(): Promise<UserGet[]> => {
-    const response: AxiosResponse<UserGet[]> = await axios.get(
-      `${apiUrl}/users/`
-    );
-
-    return response.data;
+async function fetchAll<T>(endpoint: string): Promise<T[]> {
+    try {
+        const response: AxiosResponse<T[]> = await axios.get(`${apiUrl}/${endpoint}/`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching ${apiUrl}/${endpoint}:`, error);
+        return [];
+    }
 }
 
-/* Retrieve all Regions from the db */
-export const getAllRegions = async(): Promise<Region[]> => {
-    const response: AxiosResponse<Region[]> = await axios.get(
-      `${apiUrl}/regions/`
-    );
-
-    return response.data;
-}
-
-/* Retrieve all Metrics from the db */
-export const getAllMetrics = async(): Promise<Metric[]> => {
-    const response: AxiosResponse<Metric[]> = await axios.get(
-      `${apiUrl}/metrics/`
-    );
-
-    return response.data;
-}
+export const getAllUsers = async(): Promise<UserGet[]> => fetchAll<UserGet>("users");
+export const getAllRegions = async(): Promise<Region[]> => fetchAll<Region>("regions")
+export const getAllMetrics = async(): Promise<Metric[]> => fetchAll<Metric>("metrics")
 
 // CREATE
 // TODO: All of these can be likely merged into one function

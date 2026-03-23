@@ -27,7 +27,13 @@ export interface UserResponse {
 }
 
 // REGION
-export interface RegionFormBackend {
+/* 
+ * Represents a region in the db
+ * This form is followed for both
+ * creating a new region and requesting
+ * an old one.
+ */
+export interface Region {
     region_id: number;
     region_name: string;
     region_type: string;

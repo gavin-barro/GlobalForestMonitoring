@@ -2,12 +2,12 @@ import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
 import "./common.css"
-import type { RegionFormBackend, RegionResponse, ServerErrorResponse } from "../types";
+import type { Region, RegionResponse, ServerErrorResponse } from "../types";
 import { useNavigate } from "react-router-dom";
 import { requestNewRegion } from "../services";
 import { generateRandomId } from "../utils";
 
-const initialValues: RegionFormBackend = {
+const initialValues: Region = {
     region_id: 0,
     region_name: "",
     region_type: "Country",
@@ -17,11 +17,11 @@ const initialValues: RegionFormBackend = {
 
 export default function StaticAddRegionPage() {
     const navigate = useNavigate();
-    const handleSubmit = async (values: RegionFormBackend) => {
+    const handleSubmit = async (values: Region) => {
         const region_id = generateRandomId(1000);
         console.log("Received region as the following from frontend: " + JSON.stringify(values, null, 2));
 
-        const newRegion: RegionFormBackend = {
+        const newRegion: Region = {
             region_id: region_id,
             region_name: values.region_name,
             region_type: "Country", // TODO: Pull from get request of valid types or add field

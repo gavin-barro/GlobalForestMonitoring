@@ -5,7 +5,6 @@ import "./common.css"
 import type { Region, RegionResponse, ServerErrorResponse } from "../types";
 import { getAllRegions, requestNewRegion } from "../services";
 import { useEffect, useState } from "react";
-import "./StaticAddRegion.css"
 
 const initialValues: Region = {
     region_id: 0,
@@ -63,7 +62,7 @@ export default function StaticAddRegionPage() {
                     <Form>
                         <TextInput label="Region Name" name="region_name" />
                         <label htmlFor="parent">Parent Region:</label>
-                        <div className="input-option region-parent-select">
+                        <div className="input-option">
                             <SelectInput label="" name="parent_region_id" options={regions} />
                         </div>
                         <TextInput label="GeoJSON Data" name="geo_boundary" />

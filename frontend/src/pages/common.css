@@ -33,6 +33,10 @@ form input {
   border-radius: 5px;
 }
 
+form select {
+    width: 100%;
+}
+
 select {
   background-color: white;
   border-width: 0;

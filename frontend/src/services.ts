@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationResponse, RegionFormBackend, RegionResponse, ServerErrorResponse, UserFormBackend, UserResponse } from './types';
+import type { ForestObservationFormBackend, ForestObservationResponse, RegionFormBackend, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -8,6 +8,15 @@ import type { ForestObservationFormBackend, ForestObservationResponse, RegionFor
 //   `${import.meta.env.BASE_URL}/api`
 // NOTE: This MUST be updated in future :^)
 const apiUrl = "http://localhost:8000"
+
+// GET
+export const getAllUsers = async(): Promise<UserGet[]> => {
+    const response: AxiosResponse<UserGet[]> = await axios.get(
+      `${apiUrl}/users/`
+    );
+
+    return response.data;
+}
 
 // CREATE
 // TODO: All of these can be likely merged into one function
@@ -57,6 +66,26 @@ export async function requestNewForestObservation (userForm: ForestObservationFo
     const response: AxiosResponse<ForestObservationResponse> = await axios.post(
       `${apiUrl}/forest_observations/`,
       userForm
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      // Handle non-200 status codes
+      const serverErrorResponse: ServerErrorResponse = error.response.data;
+      return serverErrorResponse;
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}
+
+// DELETE
+/* Delete a user */
+export async function requestDeleteUser (user_id: number): Promise<UserResponse | ServerErrorResponse> {
+  try {
+    const response: AxiosResponse<UserResponse> = await axios.delete(
+      `${apiUrl}/users/${user_id}`
     );
 
     return response.data;

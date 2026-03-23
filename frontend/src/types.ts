@@ -9,6 +9,16 @@ export interface UserFormBackend {
     creation_date: string;
 }
 
+// The expected structure of a user when requested from the db
+export interface UserGet {
+    username: string;
+    email: string;
+    acct_type: 'Admin' | 'Researcher' | 'Subscriber' | 'Guest';
+    user_id: number;
+    creation_date: string;
+    last_login: string;
+}
+
 // TODO: Match db expected response
 export interface UserResponse {
     id: string;

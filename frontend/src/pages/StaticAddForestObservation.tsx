@@ -1,8 +1,8 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
-import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, ServerErrorResponse } from "../types";
-import { getAllMetrics, getAllRegions, requestNewForestObservation } from "../services";
+import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, ServerErrorResponse, TimePeriod } from "../types";
+import { getAllMetrics, getAllRegions, getAllTimePeriods, requestNewForestObservation } from "../services";
 import { useEffect, useState } from "react";
 
 const initialValues: ForestObservationFormBackend = {
@@ -15,13 +15,16 @@ const initialValues: ForestObservationFormBackend = {
 
 export default function StaticAddForestObservationPage() {
     const [availableRegions, setAvailableRegions] = useState<Region[]>([]);
-    const [availableMetrics, setAvailableMetrics] = useState<Metric[]>([])
+    const [availableMetrics, setAvailableMetrics] = useState<Metric[]>([]);
+    const [availableTimePeriods, setAvailableTimePeriods] = useState<TimePeriod[]>([]);
 
     useEffect(() => {
         getAllRegions()
             .then((result) => setAvailableRegions(result))
         getAllMetrics()
             .then((result) => setAvailableMetrics(result))
+        getAllTimePeriods()
+            .then((result) => setAvailableTimePeriods(result))
     }, []);
 
     const handleSubmit = async (values: ForestObservationFormBackend) => {
@@ -52,14 +55,10 @@ export default function StaticAddForestObservationPage() {
         label: region.region_name
     }));
 
-    const timeperiods = [
-        {value: 1, label: '2024-2025'},
-        {value: 2, label: '2023-2024'},
-        {value: 3, label: '2020-2022'},
-        {value: 4, label: 'Period 4'},
-        {value: 5, label: 'Period 5'},
-        {value: 6, label: 'Period 6'}
-    ]
+    const timePeriods = availableTimePeriods.map(timePeriod => ({
+        value: timePeriod.period_id,
+        label: timePeriod.period_name
+    }))
 
     return (
         <div className="page">
@@ -80,7 +79,7 @@ export default function StaticAddForestObservationPage() {
                         </div>
                         <label htmlFor="timeperiod">During:</label>
                         <div className="input-option">
-                            <SelectInput label="" name="period_id" options={timeperiods} />
+                            <SelectInput label="" name="period_id" options={timePeriods} />
                         </div>
                         <TextInput label="With Value" name="value" type="number"/>
                         <TextInput label="On Date" name="source_date" type="date"/>

@@ -23,6 +23,7 @@ async function fetchAll<T>(endpoint: string): Promise<T[]> {
 export const getAllUsers = async(): Promise<UserGet[]> => fetchAll<UserGet>("users");
 export const getAllRegions = async(): Promise<Region[]> => fetchAll<Region>("regions")
 export const getAllMetrics = async(): Promise<Metric[]> => fetchAll<Metric>("metrics")
+export const getAllTimePeriods = async(): Promise<TimePeriod[]> => fetchAll<TimePeriod>("time_periods")
 
 // CREATE
 // TODO: All of these can be likely merged into one function

@@ -62,6 +62,14 @@ export interface Metric {
     description: string;
 }
 
+// TIME PERIOD
+export interface TimePeriod {
+    period_name: string;
+    start_year: number;
+    end_year: number;
+    period_id: number;
+}
+
 // FOREST OBSERVATION
 export interface ForestObservationFormBackend {
     value: number;

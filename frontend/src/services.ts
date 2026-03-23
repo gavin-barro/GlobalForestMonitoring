@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationResponse, Region, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
+import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, RegionResponse, ServerErrorResponse, UserFormBackend, UserGet, UserResponse } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -23,6 +23,15 @@ export const getAllUsers = async(): Promise<UserGet[]> => {
 export const getAllRegions = async(): Promise<Region[]> => {
     const response: AxiosResponse<Region[]> = await axios.get(
       `${apiUrl}/regions/`
+    );
+
+    return response.data;
+}
+
+/* Retrieve all Metrics from the db */
+export const getAllMetrics = async(): Promise<Metric[]> => {
+    const response: AxiosResponse<Metric[]> = await axios.get(
+      `${apiUrl}/metrics/`
     );
 
     return response.data;

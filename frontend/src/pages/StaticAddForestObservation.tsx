@@ -1,9 +1,8 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
-import type { ForestObservationFormBackend, ForestObservationResponse, Region, ServerErrorResponse } from "../types";
-import { useNavigate } from "react-router-dom";
-import { getAllRegions, requestNewForestObservation } from "../services";
+import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, ServerErrorResponse } from "../types";
+import { getAllMetrics, getAllRegions, requestNewForestObservation } from "../services";
 import { useEffect, useState } from "react";
 
 const initialValues: ForestObservationFormBackend = {
@@ -16,10 +15,13 @@ const initialValues: ForestObservationFormBackend = {
 
 export default function StaticAddForestObservationPage() {
     const [availableRegions, setAvailableRegions] = useState<Region[]>([]);
+    const [availableMetrics, setAvailableMetrics] = useState<Metric[]>([])
 
     useEffect(() => {
         getAllRegions()
             .then((result) => setAvailableRegions(result))
+        getAllMetrics()
+            .then((result) => setAvailableMetrics(result))
     }, []);
 
     const handleSubmit = async (values: ForestObservationFormBackend) => {
@@ -40,12 +42,10 @@ export default function StaticAddForestObservationPage() {
             console.log("Error creating new user account", requestForestObservationResponse);
         }
     }
-    const measurements = [
-        {value: 1, label: 'Tree Coverage'},
-        {value: 2, label: 'Emission Total'},
-        {value: 3, label: 'Metric 3'},
-        {value: 4, label: 'Metric 4'}
-    ]
+    const metrics = availableMetrics.map(metric => ({
+        value: metric.metric_id,
+        label: metric.metric_name
+    }));
 
     const regions = availableRegions.map(region => ({
         value: region.region_id,
@@ -72,7 +72,7 @@ export default function StaticAddForestObservationPage() {
                     <Form>
                         <label htmlFor="measures">Measures:</label>
                         <div className="input-option">
-                            <SelectInput label="" name="metric_id" options={measurements} />
+                            <SelectInput label="" name="metric_id" options={metrics} />
                         </div>
                         <label htmlFor="region">For Region:</label>
                         <div className="input-option">

@@ -47,6 +47,21 @@ export interface RegionResponse {
     region_name: string;
 }
 
+// METRIC
+/* 
+ * Represents a metric in the db
+ * NOTE: Only acceptable value_type appears
+ * to be Total according to db docs, so that
+ * is reflected here.
+ */
+export interface Metric {
+    metric_name: string;
+    unit: string;
+    value_type: 'Total';
+    metric_id: number;
+    description: string;
+}
+
 // FOREST OBSERVATION
 export interface ForestObservationFormBackend {
     value: number;

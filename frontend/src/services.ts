@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, Metric, Region, TimePeriod, UserFormBackend, UserGet } from './types';
+import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, TimePeriod, UserFormBackend, UserGet } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -26,6 +26,7 @@ export const getAllUsers = async(): Promise<UserGet[]> => fetchAll<UserGet>("use
 export const getAllRegions = async(): Promise<Region[]> => fetchAll<Region>("regions")
 export const getAllMetrics = async(): Promise<Metric[]> => fetchAll<Metric>("metrics")
 export const getAllTimePeriods = async(): Promise<TimePeriod[]> => fetchAll<TimePeriod>("time_periods")
+export const getAllForestObservations = async(): Promise<ForestObservationGet[]> => fetchAll("forest_observations")
 
 // CREATE
 async function requestCreate<T>(endpoint: string, formData: T): Promise<Boolean> {
@@ -58,3 +59,4 @@ async function requestDelete(endpoint: string, id: number): Promise<Boolean> {
 
 export const requestDeleteRegion = async(region_id: number): Promise<Boolean> => requestDelete("regions", region_id);
 export const requestDeleteUser = async(user_id: number): Promise<Boolean> => requestDelete("users", user_id);
+export const requestDeleteForestObservation = async(forestObservation_id: number): Promise<Boolean> => requestDelete("forest_observations", forestObservation_id);

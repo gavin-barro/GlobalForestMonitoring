@@ -6,6 +6,7 @@ import StaticAddUser from "./pages/StaticAddUser";
 import StaticAddForestObservation from "./pages/StaticAddForestObservation";
 import StaticDeleteUser from './pages/StaticDeleteUser';
 import StaticDeleteRegion from './pages/StaticDeleteRegion';
+import StaticDeleteForestObservation from './pages/StaticDeleteForestObservation';
 
 function App() {
   return (
@@ -14,9 +15,10 @@ function App() {
       <Routes>
         <Route path="/static/add/region" element={<StaticAddRegion />} />
         <Route path="/static/add/user" element={<StaticAddUser />} />
-        <Route path="/static/add/forestobservation" element={<StaticAddForestObservation />} />
+        <Route path="/static/add/forest_observation" element={<StaticAddForestObservation />} />
         <Route path="/static/delete/region" element={<StaticDeleteRegion />} />
         <Route path="/static/delete/user" element={<StaticDeleteUser />} />
+        <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
       </Routes>
     </div>
   )

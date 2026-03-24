@@ -66,6 +66,15 @@ export interface ForestObservationFormBackend {
     region_id: number;
 }
 
+export interface ForestObservationGet {
+    value: number;
+    source_date: string;
+    period_id: number;
+    metric_id: number;
+    region_id: number;
+    observation_id: number;
+}
+
 // GENERIC
 export interface ServerErrorResponse {
     reason: string;

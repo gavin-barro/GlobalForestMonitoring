@@ -2,8 +2,8 @@ import { Form, Formik, type FormikHelpers } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
 import "./common.css"
-import type { Region, RegionResponse, ServerErrorResponse } from "../types";
-import { getAllRegions, requestNewRegion } from "../services";
+import type { Region } from "../types";
+import { getAllRegions, requestCreateRegion } from "../services";
 import { useEffect, useState } from "react";
 
 const initialValues: Region = {
@@ -34,15 +34,14 @@ export default function StaticAddRegionPage() {
         }
 
         console.log("Passing user as the following to backend: " + JSON.stringify(newRegion, null, 2));
-        const requestRegionResponse: RegionResponse | ServerErrorResponse =
-            await requestNewRegion(newRegion);
-        if ("error" in requestRegionResponse) {
-            console.log("Error creating new user account", requestRegionResponse);
-        } else {
+        const requestSuccess: Boolean = await requestCreateRegion(newRegion);
+        if (requestSuccess) {
             // Don't know which id db will assign region, so refetch region list
             const updatedRegions = await getAllRegions();
             setParentRegions(updatedRegions);
             resetForm()
+        } else {
+            console.log("Error creating new user account");
         }
     }
 

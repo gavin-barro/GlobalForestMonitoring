@@ -1,8 +1,8 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import SelectInput from "../components/form/SelectInput";
-import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, ServerErrorResponse, TimePeriod } from "../types";
-import { getAllMetrics, getAllRegions, getAllTimePeriods, requestNewForestObservation } from "../services";
+import type { ForestObservationFormBackend, Metric, Region, TimePeriod } from "../types";
+import { getAllMetrics, getAllRegions, getAllTimePeriods, requestCreateForestObservation } from "../services";
 import { useEffect, useState } from "react";
 
 const initialValues: ForestObservationFormBackend = {
@@ -39,10 +39,9 @@ export default function StaticAddForestObservationPage() {
         }
 
         console.log("Passing forest observation as the following to backend: " + JSON.stringify(newForestObservation, null, 2));
-        const requestForestObservationResponse: ForestObservationResponse | ServerErrorResponse =
-            await requestNewForestObservation(newForestObservation);
-        if ("error" in requestForestObservationResponse) {
-            console.log("Error creating new user account", requestForestObservationResponse);
+        const requestSuccess: Boolean = await requestCreateForestObservation(newForestObservation);
+        if (!requestSuccess) {
+            console.log("Error creating new user account");
         }
     }
     const metrics = availableMetrics.map(metric => ({

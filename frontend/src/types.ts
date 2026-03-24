@@ -19,13 +19,6 @@ export interface UserGet {
     last_login: string;
 }
 
-// TODO: Match db expected response
-export interface UserResponse {
-    id: string;
-    username: string;
-    email: string;
-}
-
 // REGION
 /* 
  * Represents a region in the db
@@ -39,12 +32,6 @@ export interface Region {
     region_type: string;
     geo_boundary: string;
     parent_region_id: number;
-}
-
-// TODO: Match db expected response
-export interface RegionResponse {
-    id: string;
-    region_name: string;
 }
 
 // METRIC
@@ -77,12 +64,6 @@ export interface ForestObservationFormBackend {
     period_id: number;
     metric_id: number;
     region_id: number;
-}
-
-// TODO: Match db expected response
-export interface ForestObservationResponse {
-    id: number;
-    value: number;
 }
 
 // GENERIC

@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationResponse, Metric, Region, RegionResponse, ServerErrorResponse, TimePeriod, UserFormBackend, UserGet, UserResponse } from './types';
+import type { ForestObservationFormBackend, Metric, Region, TimePeriod, UserFormBackend, UserGet } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -8,6 +8,8 @@ import type { ForestObservationFormBackend, ForestObservationResponse, Metric, R
 //   `${import.meta.env.BASE_URL}/api`
 // NOTE: This MUST be updated in future :^)
 const apiUrl = "http://localhost:8000"
+
+// TODO: Implement returning helpful error responses from requests
 
 // GET
 async function fetchAll<T>(endpoint: string): Promise<T[]> {
@@ -26,66 +28,22 @@ export const getAllMetrics = async(): Promise<Metric[]> => fetchAll<Metric>("met
 export const getAllTimePeriods = async(): Promise<TimePeriod[]> => fetchAll<TimePeriod>("time_periods")
 
 // CREATE
-// TODO: All of these can be likely merged into one function
-/* Request create new user */
-export async function requestNewUser (userForm: UserFormBackend): Promise<UserResponse | ServerErrorResponse> {
-  try {
-    const response: AxiosResponse<UserResponse> = await axios.post(
-      `${apiUrl}/users/`,
-      userForm
-    );
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      // Handle non-200 status codes
-      const serverErrorResponse: ServerErrorResponse = error.response.data;
-      return serverErrorResponse;
-    } else {
-      throw new Error("An unexpected error occurred");
+async function requestCreate<T>(endpoint: string, formData: T): Promise<Boolean> {
+    try {
+        await axios.post(
+            `${apiUrl}/${endpoint}/`,
+            formData
+        );
+        return true;
+    } catch (error) {
+        console.error(`Error creating element at url: ${apiUrl}/${endpoint}:`, error);
+        return false;
     }
-  }
 }
 
-/* Request to create a new region */
-export async function requestNewRegion (userForm: Region): Promise<RegionResponse | ServerErrorResponse> {
-  try {
-    const response: AxiosResponse<RegionResponse> = await axios.post(
-      `${apiUrl}/regions/`,
-      userForm
-    );
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      // Handle non-200 status codes
-      const serverErrorResponse: ServerErrorResponse = error.response.data;
-      return serverErrorResponse;
-    } else {
-      throw new Error("An unexpected error occurred");
-    }
-  }
-}
-
-/* Request to create a new forest observation */
-export async function requestNewForestObservation (userForm: ForestObservationFormBackend): Promise<ForestObservationResponse | ServerErrorResponse> {
-  try {
-    const response: AxiosResponse<ForestObservationResponse> = await axios.post(
-      `${apiUrl}/forest_observations/`,
-      userForm
-    );
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      // Handle non-200 status codes
-      const serverErrorResponse: ServerErrorResponse = error.response.data;
-      return serverErrorResponse;
-    } else {
-      throw new Error("An unexpected error occurred");
-    }
-  }
-}
+export const requestCreateUser = async(userForm: UserFormBackend): Promise<Boolean> => requestCreate<UserFormBackend>("users", userForm)
+export const requestCreateRegion = async(regionForm: Region): Promise<Boolean> => requestCreate<Region>("regions", regionForm)
+export const requestCreateForestObservation = async(forestObservationForm: ForestObservationFormBackend): Promise<Boolean> => requestCreate<ForestObservationFormBackend>("forest_observations", forestObservationForm)
 
 // DELETE
 /* Delete a user */

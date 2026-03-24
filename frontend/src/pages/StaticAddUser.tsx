@@ -1,8 +1,8 @@
 import { Form, Formik } from "formik";
 import { format } from "date-fns"; // NOTE: Might not need long term, but useful rn
 import TextInput from "../components/form/TextInput";
-import type { ServerErrorResponse, UserFormBackend, UserResponse } from "../types";
-import { requestNewUser } from "../services";
+import type { UserFormBackend } from "../types";
+import { requestCreateUser } from "../services";
 import { useNavigate } from "react-router-dom";
 import { generateRandomId } from "../utils";
 
@@ -33,12 +33,11 @@ export default function StaticAddUserPage() {
         }
 
         console.log("Passing user as the following to backend: " + JSON.stringify(newUser, null, 2));
-        const requestUserResponse: UserResponse | ServerErrorResponse =
-            await requestNewUser(newUser);
-        if ("error" in requestUserResponse) {
-            console.log("Error creating new user account", requestUserResponse);
-        } else {
+        const requestSuccess: Boolean = await requestCreateUser(newUser);
+        if (requestSuccess) {
             navigate("/");
+        } else {
+            console.log("Error creating new user account");
         }
     }
 

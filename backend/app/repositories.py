@@ -105,45 +105,77 @@ class RegionRepository(BaseRepository):
     """Repository for Region operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[Regions]:
-        sql_statement = select(Regions).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Regions).from_statement(
+            text("SELECT * FROM regions OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
     async def get_by_id(self, region_id: int) -> Optional[Regions]:
-        sql_statement = select(Regions).where(Regions.region_id == region_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Regions).from_statement(
+            text("SELECT * FROM regions WHERE region_id = :region_id")
+        )
+        result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalar_one_or_none()
 
     async def get_by_region_name(self, region_name: str) -> Optional[Regions]:
-        sql_statement = select(Regions).where(Regions.region_name == region_name)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Regions).from_statement(
+            text("SELECT * FROM regions WHERE region_name = :region_name")
+        )
+        result = await self.db.execute(sql_statement, {"region_name": region_name})
         return result.scalar_one_or_none()
 
     async def create(self, region_data: RegionCreate) -> Regions:
-        region = Regions(**region_data.model_dump())
-        self.db.add(region)
+        data = region_data.model_dump()
+        sql_statement = select(Regions).from_statement(
+            text("INSERT INTO regions (region_name, region_type, parent_region) \
+                    VALUES (:region_name, :region_type, :parent_region_id) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql_statement, data)
+        region = result.scalar_one()
+        
         await self.commit()
         await self.refresh(region)
         return region
 
     async def update(self, region_id: int, region_update: RegionUpdate) -> Optional[Regions]:
+    # We check if it exists first
         region = await self.get_by_id(region_id)
         if not region:
             return None
 
         update_data = region_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(Regions).where(Regions.region_id == region_id).values(**update_data))
-            await self.db.execute(sql_statement)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "region_id": region_id}
+            
+            # Use select().from_statement() + RETURNING * # to ensure we get a mapped object back
+            sql_statement = select(Regions).from_statement(
+                text(f"""
+                    UPDATE regions
+                    SET {set_clause}
+                    WHERE region_id = :region_id
+                    RETURNING *
+                """)
+            )
+            
+            result = await self.db.execute(sql_statement, params)
+            # Fetch the updated version from the result
+            region = result.scalar_one_or_none()
+            
             await self.commit()
-            await self.refresh(region)
+            if region:
+                await self.refresh(region)
+                
         return region
 
     async def delete(self, region_id: int) -> bool:
         region = await self.get_by_id(region_id)
         if not region:
             return False
-        await self.db.delete(region)
+        sql = text("DELETE FROM regions WHERE region_id = :region_id")
+        await self.db.execute(sql, {"region_id": region_id})
         await self.commit()
         return True
 
@@ -152,23 +184,36 @@ class MetricRepository(BaseRepository):
     """Repository for Metric operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[Metrics]:
-        sql_statement = select(Metrics).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Metrics).from_statement(
+            text("SELECT * FROM metrics OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
     async def get_by_id(self, metric_id: int) -> Optional[Metrics]:
-        sql_statement = select(Metrics).where(Metrics.metric_id == metric_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Metrics).from_statement(
+            text("SELECT * FROM metrics WHERE metric_id = :metric_id")
+        )
+        result = await self.db.execute(sql_statement, {"metric_id": metric_id})
         return result.scalar_one_or_none()
 
     async def get_by_metric_name(self, metric_name: str) -> Optional[Metrics]:
-        sql_statement = select(Metrics).where(Metrics.metric_name == metric_name)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Metrics).from_statement(
+            text("SELECT * FROM metrics WHERE metric_name = :metric_name")
+        )
+        result = await self.db.execute(sql_statement, {"metric_name": metric_name})
         return result.scalar_one_or_none()
     
     async def create(self, metric_data: MetricCreate) -> Metrics:
-        metric = Metrics(**metric_data.model_dump())
-        self.db.add(metric)
+        data = metric_data.model_dump()
+        sql_statement = select(Metrics).from_statement(
+            text("INSERT INTO metrics (metric_name, description, unit, value_type) \
+                    VALUES (:metric_name, :description, :unit, :value_type) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql_statement, data)
+        metric = result.scalar_one()
+        
         await self.commit()
         await self.refresh(metric)
         return metric
@@ -180,8 +225,14 @@ class MetricRepository(BaseRepository):
 
         update_data = metric_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(Metrics).where(Metrics.metric_id == metric_id).values(**update_data))
-            await self.db.execute(sql_statement)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "metric_id": metric_id}
+            sql_statement = text(f"""
+                                 UPDATE metrics
+                                 SET {set_clause}
+                                 WHERE metric_id = :metric_id
+                                 """)
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(metric)
         return metric
@@ -191,7 +242,8 @@ class MetricRepository(BaseRepository):
         metric = await self.get_by_id(metric_id)
         if not metric:
             return False
-        await self.db.delete(metric)
+        sql = text("DELETE FROM metrics WHERE metric_id = :metric_id")
+        await self.db.execute(sql, {"metric_id": metric_id})
         await self.commit()
         return True
 
@@ -200,37 +252,50 @@ class SubscriptionRepository(BaseRepository):
     """Repository for Subscription operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[Subscriptions]:
-        sql_statement = select(Subscriptions).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Subscriptions).from_statement(
+            text("SELECT * FROM subscriptions OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
     async def get_by_ids(self, user_id: int, metric_id: int, region_id: int) -> Optional[Subscriptions]:
-        sql_statement = select(Subscriptions).where(
-            Subscriptions.user_id == user_id,
-            Subscriptions.metric_id == metric_id,
-            Subscriptions.region_id == region_id
+        sql_statement = select(Subscriptions).from_statement(
+            text("SELECT * FROM subscriptions WHERE user_id = :user_id AND metric_id = :metric_id AND region_id = :region_id")
         )
-        result = await self.db.execute(sql_statement)
+        result = await self.db.execute(sql_statement, {"user_id": user_id, "metric_id": metric_id, "region_id": region_id})
         return result.scalar_one_or_none()
 
     async def get_by_user(self, user_id: int) -> List[Subscriptions]:
-        sql_statement = select(Subscriptions).where(Subscriptions.user_id == user_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Subscriptions).from_statement(
+            text("SELECT * FROM subscriptions WHERE user_id = :user_id")
+        )
+        result = await self.db.execute(sql_statement, {"user_id": user_id})
         return result.scalars().all()
 
     async def get_by_region(self, region_id: int) -> List[Subscriptions]:
-        sql_statement = select(Subscriptions).where(Subscriptions.region_id == region_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Subscriptions).from_statement(
+            text("SELECT * FROM subscriptions WHERE region_id = :region_id")
+        )
+        result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalars().all()
 
     async def get_by_metric(self, metric_id: int) -> List[Subscriptions]:
-        sql_statement = select(Subscriptions).where(Subscriptions.metric_id == metric_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Subscriptions).from_statement(
+            text("SELECT * FROM subscriptions WHERE metric_id = :metric_id")
+        )
+        result = await self.db.execute(sql_statement, {"metric_id": metric_id})
         return result.scalars().all()
 
     async def create(self, sub_data: SubscriptionCreate) -> Subscriptions:
-        sub = Subscriptions(**sub_data.model_dump())
-        self.db.add(sub)
+        data = sub_data.model_dump()
+        sql_statement = select(Subscriptions).from_statement(
+            text("INSERT INTO subscriptions (user_id, metric_id, region_id, active, threshold_value) \
+                    VALUES (:user_id, :metric_id, :region_id, :active, :threshold_value)" \
+                    "RETURNING *")
+        )
+        result = await self.db.execute(sql_statement, data)
+        sub = result.scalar_one()
+
         await self.commit()
         await self.refresh(sub)
         return sub
@@ -242,13 +307,17 @@ class SubscriptionRepository(BaseRepository):
 
         update_data = sub_update.model_dump(exclude_unset=True)
         if update_data:
-            stmt = (update(Subscriptions).where(
-                    Subscriptions.user_id == user_id,
-                    Subscriptions.metric_id == metric_id,
-                    Subscriptions.region_id == region_id
-                ).values(**update_data)
-            )
-            await self.db.execute(stmt)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**sub_update.model_dump(), "user_id": user_id, "metric_id": metric_id, "region_id": region_id}
+            stmt = select(Subscriptions).from_statement(
+                text(f"""
+                    UPDATE subscriptions
+                    SET {set_clause}
+                    WHERE user_id = :user_id AND metric_id = :metric_id AND region_id = :region_id
+                    RETURNING *
+                """))
+            await self.db.execute(stmt, params)
+            
             await self.commit()
             await self.refresh(subscription)
         return subscription
@@ -257,7 +326,8 @@ class SubscriptionRepository(BaseRepository):
         subscription = await self.get_by_ids(user_id, metric_id, region_id)
         if not subscription:
             return False
-        await self.db.delete(subscription)
+        sql = text("DELETE FROM subscriptions WHERE user_id = :user_id AND metric_id = :metric_id AND region_id = :region_id")
+        await self.db.execute(sql, {"user_id": user_id, "metric_id": metric_id, "region_id": region_id})
         await self.commit()
         return True
 
@@ -303,23 +373,36 @@ class FORepository(BaseRepository):
     """Repository for ForestObservations operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[ForestObservations]:
-        sql_statement = select(ForestObservations).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(ForestObservations).from_statement(
+            text("SELECT * FROM forest_observations OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
     async def get_by_id(self, fo_id: int) -> Optional[ForestObservations]:
-        sql_statement = select(ForestObservations).where(ForestObservations.observation_id == fo_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(ForestObservations).from_statement(
+            text("SELECT * FROM forest_observations WHERE observation_id = :observation_id")
+        )
+        result = await self.db.execute(sql_statement, {"observation_id": fo_id})
         return result.scalar_one_or_none()
 
     async def get_by_region_id(self, region_id: int) -> Optional[ForestObservations]:
-        sql_statement = select(ForestObservations).where(ForestObservations.region_id == region_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(ForestObservations).from_statement(
+            text("SELECT * FROM forest_observations WHERE describing_region_id = :region_id")
+        )
+        result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalars().all()
 
     async def create(self, fo_data: FOCreate) -> ForestObservations:
-        fo = ForestObservations(**fo_data.model_dump())
-        self.db.add(fo)
+        data = fo_data.model_dump()
+        sql = select(ForestObservations).from_statement(
+            text("INSERT INTO forest_observations (value, source_date, observation_period_id, observation_metric, describing_region_id) \
+                    VALUES (:value, :source_date, :period_id, :metric_id, :region_id) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql, data)
+        fo = result.scalar_one()
+
         await self.commit()
         await self.refresh(fo)
         return fo
@@ -331,8 +414,14 @@ class FORepository(BaseRepository):
 
         update_data = fo_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(ForestObservations).where(ForestObservations.observation_id == fo_id).values(**update_data))
-            await self.db.execute(sql_statement)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "observation_id": fo_id}
+            sql_statement = select(ForestObservations).from_statement(text(f"""
+                                 UPDATE forest_observations
+                                 SET {set_clause}
+                                 WHERE observation_id = :observation_id
+                                 RETURNING *"""))
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(fo)
         return fo
@@ -341,7 +430,8 @@ class FORepository(BaseRepository):
         fo = await self.get_by_id(fo_id)
         if not fo:
             return False
-        await self.db.delete(fo)
+        sql = text("DELETE FROM forest_observations WHERE observation_id = :observation_id")
+        await self.db.execute(sql, {"observation_id": fo_id})
         await self.commit()
         return True
 
@@ -350,23 +440,36 @@ class TPRepository(BaseRepository):
     """Repository for TimePeriods operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[TimePeriods]:
-        sql_statement = select(TimePeriods).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(TimePeriods).from_statement(
+            text("SELECT * FROM time_periods OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
     async def get_by_id(self, tp_id: int) -> Optional[TimePeriods]:
-        sql_statement = select(TimePeriods).where(TimePeriods.period_id == tp_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(TimePeriods).from_statement(
+            text("SELECT * FROM time_periods WHERE period_id = :period_id")
+        )
+        result = await self.db.execute(sql_statement, {"period_id": tp_id})
         return result.scalar_one_or_none()
 
     async def get_by_tp_name(self, tp_name: str) -> Optional[TimePeriods]:
-        sql_statement = select(TimePeriods).where(TimePeriods.period_name == tp_name)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(TimePeriods).from_statement(
+            text("SELECT * FROM time_periods WHERE period_name = :period_name")
+        )
+        result = await self.db.execute(sql_statement, {"period_name": tp_name})
         return result.scalar_one_or_none()
 
     async def create(self, tp_data: TPCreate) -> TimePeriods:
-        tp = TimePeriods(**tp_data.model_dump())
-        self.db.add(tp)
+        data = tp_data.model_dump()
+        sql = select(TimePeriods).from_statement(
+            text("INSERT INTO time_periods (period_name, start_year, end_year) \
+                    VALUES (:period_name, :start_year, :end_year) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql, data)
+        tp = result.scalar_one()
+
         await self.commit()
         await self.refresh(tp)
         return tp
@@ -378,8 +481,14 @@ class TPRepository(BaseRepository):
 
         update_data = tp_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(TimePeriods).where(TimePeriods.period_id == tp_id).values(**update_data))
-            await self.db.execute(sql_statement)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "period_id": tp_id}
+            sql_statement = select(TimePeriods).from_statement(text(f"""
+                                 UPDATE time_periods
+                                 SET {set_clause}
+                                 WHERE period_id = :period_id
+                                 RETURNING *"""))
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(tp)
         return tp
@@ -388,7 +497,8 @@ class TPRepository(BaseRepository):
         tp = await self.get_by_id(tp_id)
         if not tp:
             return False
-        await self.db.delete(tp)
+        sql = text("DELETE FROM time_periods WHERE period_id = :period_id")
+        await self.db.execute(sql, {"period_id": tp_id})
         await self.commit()
         return True
     

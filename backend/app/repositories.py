@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import text, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -35,28 +35,40 @@ class UserRepository(BaseRepository):
     """Repository for User operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> List[Users]:
-        sql_statement = select(Users).offset(skip).limit(limit)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Users).from_statement(
+            text("SELECT * FROM users OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
     async def get_by_id(self, user_id: int) -> Optional[Users]:
-        sql_statement = select(Users).where(Users.user_id == user_id)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Users).from_statement(
+            text("SELECT * FROM users WHERE user_id = :user_id"))
+        result = await self.db.execute(sql_statement, {"user_id": user_id})
         return result.scalar_one_or_none()
 
     async def get_by_username(self, username: str) -> Optional[Users]:
-        sql_statement = select(Users).where(Users.username == username)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Users).from_statement(
+            text("SELECT * FROM users WHERE username = :username"))
+        result = await self.db.execute(sql_statement, {"username": username})
         return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> Optional[Users]:
-        sql_statement = select(Users).where(Users.email == email)
-        result = await self.db.execute(sql_statement)
+        sql_statement = select(Users).from_statement(
+            text("SELECT * FROM users WHERE email = :email"))
+        result = await self.db.execute(sql_statement, {"email": email})
         return result.scalar_one_or_none()
 
     async def create(self, user_data: UserCreate) -> Users:
-        user = Users(**user_data.model_dump())
-        self.db.add(user)
+        data = user_data.model_dump()
+
+        sql = select(Users).from_statement(
+            text("INSERT INTO users (username, pw_hash, acct_type, email, creation_date) \
+                    VALUES (:username, :pw_hash, :acct_type, :email, :creation_date) " \
+                    "RETURNING *"))
+        result = await self.db.execute(sql, data)
+        user = result.scalar_one()
+
         await self.commit()
         await self.refresh(user)
         return user
@@ -68,17 +80,23 @@ class UserRepository(BaseRepository):
 
         update_data = user_update.model_dump(exclude_unset=True)
         if update_data:
-            sql_statement = (update(Users).where(Users.user_id == user_id).values(**update_data))
-            await self.db.execute(sql_statement)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "user_id": user_id}
+            sql_statement = text(f"""
+                                 UPDATE users
+                                 SET {set_clause}
+                                 WHERE user_id = :user_id
+                                 """)
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(user)
         return user
 
     async def delete(self, user_id: int) -> bool:
-        user = await self.get_by_id(user_id)
-        if not user:
+        if not await self.get_by_id(user_id):
             return False
-        await self.db.delete(user)
+        sql = text("DELETE FROM users WHERE user_id = :user_id")
+        await self.db.execute(sql, {"user_id": user_id})
         await self.commit()
         return True
 

@@ -1,34 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import AppHeader from './components/AppHeader'
+import { Routes, Route } from "react-router-dom";
+import StaticAddRegion from "./pages/StaticAddRegion";
+import StaticAddUser from "./pages/StaticAddUser";
+import StaticAddForestObservation from "./pages/StaticAddForestObservation";
+import StaticDeleteUser from './pages/StaticDeleteUser';
+import StaticDeleteRegion from './pages/StaticDeleteRegion';
+import StaticDeleteForestObservation from './pages/StaticDeleteForestObservation';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="app">
+      <AppHeader />
+      <Routes>
+        <Route path="/static/add/region" element={<StaticAddRegion />} />
+        <Route path="/static/add/user" element={<StaticAddUser />} />
+        <Route path="/static/add/forest_observation" element={<StaticAddForestObservation />} />
+        <Route path="/static/delete/region" element={<StaticDeleteRegion />} />
+        <Route path="/static/delete/user" element={<StaticDeleteUser />} />
+        <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
+      </Routes>
+    </div>
   )
 }
 

@@ -558,6 +558,9 @@ class RCRepository(BaseRepository):
     def get_by_submitting_lct_id(self, lct_id: int) -> Optional[RegionClassification]:
         return self.db.query(RegionClassification).filter(RegionClassification.lct_id == lct_id).all()
 
+    def get_by_region_id(self, region_id: int) -> Optional[RegionClassification]:
+        return self.db.query(RegionClassification).filter(RegionClassification.region_id == region_id).all()
+
     def create(self, rc_data: RCCreate) -> RegionClassification:
         rc = RegionClassification(**rc_data.model_dump())
         self.db.add(rc)

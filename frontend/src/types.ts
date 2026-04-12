@@ -75,6 +75,15 @@ export interface ForestObservationGet {
     observation_id: number;
 }
 
+// SUBSCRIPTION
+export interface Subscription {
+    user_id: number;
+    metric_id: number;
+    region_id: number;
+    active: boolean;
+    threshold_value: number;
+}
+
 // GENERIC
 export interface ServerErrorResponse {
     reason: string;

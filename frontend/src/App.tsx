@@ -8,6 +8,7 @@ import StaticDeleteUser from './pages/StaticDeleteUser';
 import StaticDeleteRegion from './pages/StaticDeleteRegion';
 import StaticDeleteForestObservation from './pages/StaticDeleteForestObservation';
 import UpdateFeed from './pages/UpdateFeed';
+import SubscriptionFeed from './pages/SubscriptionFeed'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/static/delete/user" element={<StaticDeleteUser />} />
         <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
         <Route path="/static/get/feed" element={<UpdateFeed />} />
+        <Route path="/static/get/subscription" element={<SubscriptionFeed />} />
       </Routes>
     </div>
   )

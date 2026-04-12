@@ -13,22 +13,24 @@ export default function UpdateFeedPage() {
 
     useEffect(() => {
         getAllForestObservations()
-                    .then((result) => setForestObservations(result));
-                getAllTimePeriods()
-                    .then((result) => setTimePeriods(result));
-                getAllMetrics()
-                    .then((result) => setMetrics(result));
-                getAllRegions()
-                    .then((result) => setRegions(result));
+            .then((result) => setForestObservations(result));
+        getAllTimePeriods()
+            .then((result) => setTimePeriods(result));
+        getAllMetrics()
+            .then((result) => setMetrics(result));
+        getAllRegions()
+            .then((result) => setRegions(result));
     }, []);
 
     const orderedForestObservations = [...forestObservations].sort(
         (a, b) =>
-            new Date(a.source_date).getTime() -
-            new Date(b.source_date).getTime()
+            new Date(b.source_date).getTime() -
+            new Date(a.source_date).getTime()
     )
 
-    const handleSubscribe = async() => {}
+    const handleSubscribe = async(user_id: number) => {
+
+    }
 
     return (
         <div className="page">
@@ -43,7 +45,7 @@ export default function UpdateFeedPage() {
                         <div className="fo-detail">
                             {getMetricName(metrics, fo.metric_id)}: {fo.value}
                         </div>
-                        <button onClick={() => handleSubscribe()}>
+                        <button onClick={() => handleSubscribe(0)}> {/*TODO: Provide user ID from context*/}
                             🔔
                         </button>
                     </div>

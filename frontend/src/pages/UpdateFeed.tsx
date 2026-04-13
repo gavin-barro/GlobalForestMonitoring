@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAllForestObservations, getAllMetrics, getAllRegions, getAllTimePeriods } from "../services";
-import type { ForestObservationGet, Metric, Region, TimePeriod } from "../types";
+import { getAllForestObservations, getAllMetrics, getAllRegions, getAllTimePeriods, requestCreateSubscription } from "../services";
+import type { ForestObservationGet, Metric, Region, Subscription, TimePeriod } from "../types";
 import { formatSourceDate, getMetricName, getRegionName, getTimePeriodName } from "../utils";
 import "./common.css"
 
@@ -28,8 +28,19 @@ export default function UpdateFeedPage() {
             new Date(a.source_date).getTime()
     )
 
-    const handleSubscribe = async(user_id: number) => {
-
+    const handleSubscribe = async(user_id: number, metric_id: number, region_id: number) => {
+        const sub: Subscription = {
+            user_id: user_id,
+            metric_id: metric_id,
+            region_id: region_id,
+            active: true,
+            threshold_value: 0 // TODO: Consult with team about how best to input this
+        }
+        console.log("Passing subscription as the following to backend: " + JSON.stringify(sub, null, 2));
+        const requestSuccess: Boolean = await requestCreateSubscription(sub);
+        if (!requestSuccess) {
+            console.log("Error adding new subscription");
+        }
     }
 
     return (
@@ -45,7 +56,7 @@ export default function UpdateFeedPage() {
                         <div className="fo-detail">
                             {getMetricName(metrics, fo.metric_id)}: {fo.value}
                         </div>
-                        <button onClick={() => handleSubscribe(0)}> {/*TODO: Provide user ID from context*/}
+                        <button onClick={() => handleSubscribe(0, fo.metric_id, fo.region_id)}> {/*TODO: Provide user ID from context*/}
                             🔔
                         </button>
                     </div>

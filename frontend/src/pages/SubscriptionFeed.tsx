@@ -36,7 +36,6 @@ export default function SubscriptionPage() {
         subscriptions: Subscription[],
         user_id: number
     ): ForestObservationGet[] {
-        console.log(subscriptions)
         return observations.filter(fo =>
             subscriptions.some(sub =>
                 sub.active = true &&

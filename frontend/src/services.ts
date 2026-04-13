@@ -47,6 +47,7 @@ async function requestCreate<T>(endpoint: string, formData: T): Promise<Boolean>
 export const requestCreateUser = async(userForm: UserFormBackend): Promise<Boolean> => requestCreate<UserFormBackend>("users", userForm)
 export const requestCreateRegion = async(regionForm: Region): Promise<Boolean> => requestCreate<Region>("regions", regionForm)
 export const requestCreateForestObservation = async(forestObservationForm: ForestObservationFormBackend): Promise<Boolean> => requestCreate<ForestObservationFormBackend>("forest_observations", forestObservationForm)
+export const requestCreateSubscription = async(subscription: Subscription): Promise<Boolean> => requestCreate<Subscription>("subscriptions", subscription);
 
 // DELETE
 /* Delete a user */

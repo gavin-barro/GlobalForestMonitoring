@@ -62,3 +62,6 @@ async function requestDelete(endpoint: string, id: number): Promise<Boolean> {
 export const requestDeleteRegion = async(region_id: number): Promise<Boolean> => requestDelete("regions", region_id);
 export const requestDeleteUser = async(user_id: number): Promise<Boolean> => requestDelete("users", user_id);
 export const requestDeleteForestObservation = async(forestObservation_id: number): Promise<Boolean> => requestDelete("forest_observations", forestObservation_id);
+// TODO: requestDeleteSubscription doesn't follow the simpler format as above so might be best to refactor, but using this for now
+export const requestDeleteSubscription = async(user_id: number, metric_id: number, region_id: number): Promise<Boolean> =>
+    requestDelete(`subscriptions/${user_id}/${metric_id}`, region_id)

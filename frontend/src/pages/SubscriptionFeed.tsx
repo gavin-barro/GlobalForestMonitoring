@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllForestObservations, getAllMetrics, getAllRegions, getAllTimePeriods, getSubscriptionByUser } from "../services";
+import { getAllForestObservations, getAllMetrics, getAllRegions, getAllTimePeriods, getSubscriptionByUser, requestDeleteSubscription } from "../services";
 import { type Subscription, type ForestObservationGet, type Metric, type Region, type TimePeriod } from "../types";
 import { formatSourceDate, getMetricName, getRegionName, getTimePeriodName } from "../utils";
 import "./common.css"
@@ -36,6 +36,7 @@ export default function SubscriptionPage() {
         subscriptions: Subscription[],
         user_id: number
     ): ForestObservationGet[] {
+        console.log(subscriptions)
         return observations.filter(fo =>
             subscriptions.some(sub =>
                 sub.active = true &&
@@ -47,10 +48,22 @@ export default function SubscriptionPage() {
         )
     }
 
-    const userSubscriptions = getSubscribedObservations(forestObservations, subscriptions, 0); // TODO: Get user ID from context
+    var userSubscriptions = getSubscribedObservations(orderedForestObservations, subscriptions, 0); // TODO: Get user ID from context
 
-    const handleUnsubscribe = async(user_id: number) => {
+    const handleUnsubscribe = async(user_id: number, metric_id: number, region_id: number) => {
+        const success = await requestDeleteSubscription(user_id, metric_id, region_id)
 
+        if (success) {
+            setSubscriptions((prev) => prev.filter((sub) =>
+                sub.user_id === user_id &&
+                sub.metric_id !== metric_id &&
+                sub.region_id !== region_id
+            ))
+            // Reacquire subscriptions
+            userSubscriptions = getSubscribedObservations(orderedForestObservations, subscriptions, 0); // TODO: Get user ID from context
+        } else {
+            console.log(`Failed to delete subscription with user_id: ${user_id}, metric_id: ${metric_id}, region_id: ${region_id}`);
+        }
     }
 
     return (
@@ -61,13 +74,13 @@ export default function SubscriptionPage() {
                 {userSubscriptions.map((fo) => (
                     <div className="list-entry" key={fo.observation_id}>
                         <div className="fo-detail">
-                            {getRegionName(regions, fo.region_id)}: {formatSourceDate(fo.source_date)} ({getTimePeriodName(timePeriods, fo.period_id)})
+                            {getRegionName(regions, fo.region_id)}: {getMetricName(metrics, fo.metric_id)} of <strong>{fo.value}</strong>
                         </div>
                         <div className="fo-detail">
-                            {getMetricName(metrics, fo.metric_id)}: {fo.value}
+                            {formatSourceDate(fo.source_date)} ({getTimePeriodName(timePeriods, fo.period_id)})
                         </div>
-                        <button onClick={() => handleUnsubscribe(0)}> {/*TODO: Provide user ID from context*/}
-                            🔔
+                        <button onClick={() => handleUnsubscribe(0, fo.metric_id, fo.region_id)}> {/*TODO: Provide user ID from context*/}
+                            Unsubscribe
                         </button>
                     </div>
                 ))}

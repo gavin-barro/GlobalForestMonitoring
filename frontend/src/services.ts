@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, UserFormBackend, UserGet } from './types';
+import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, 
+    UserFormBackend, UserGet, LandCoverType, LCTCreate } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -62,3 +63,13 @@ async function requestDelete(endpoint: string, id: number): Promise<Boolean> {
 export const requestDeleteRegion = async(region_id: number): Promise<Boolean> => requestDelete("regions", region_id);
 export const requestDeleteUser = async(user_id: number): Promise<Boolean> => requestDelete("users", user_id);
 export const requestDeleteForestObservation = async(forestObservation_id: number): Promise<Boolean> => requestDelete("forest_observations", forestObservation_id);
+
+// LAND COVER TYPES
+export const getAllLandCoverTypes = async(): Promise<LandCoverType[]> => 
+    fetchAll<LandCoverType>("land_cover_types");
+
+export const requestCreateLandCoverType = async(lctForm: LCTCreate): Promise<Boolean> => 
+    requestCreate<LCTCreate>("land_cover_types", lctForm);
+
+export const requestDeleteLandCoverType = async(lct_id: number): Promise<Boolean> => 
+    requestDelete("land_cover_types", lct_id);

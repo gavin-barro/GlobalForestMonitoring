@@ -91,3 +91,17 @@ export interface ServerErrorResponse {
     fieldName: string;
     error: boolean;
 }
+
+// LAND COVER TYPE
+export interface LandCoverType {
+    lct_id: number;
+    type_name: string;
+    description: string;
+    category: string;
+}
+
+export interface LCTCreate {
+    type_name: string;
+    description?: string;
+    category: string;
+}

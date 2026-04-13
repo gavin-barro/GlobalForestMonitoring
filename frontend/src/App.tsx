@@ -9,6 +9,8 @@ import StaticDeleteRegion from './pages/StaticDeleteRegion';
 import StaticDeleteForestObservation from './pages/StaticDeleteForestObservation';
 import UpdateFeed from './pages/UpdateFeed';
 import SubscriptionFeed from './pages/SubscriptionFeed'
+import StaticAddLandCoverTypePage from "./pages/StaticAddLandCoverType";
+import StaticDeleteLandCoverTypePage from "./pages/StaticDeleteLandCoverType";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
         <Route path="/static/get/feed" element={<UpdateFeed />} />
         <Route path="/static/get/subscription" element={<SubscriptionFeed />} />
+        <Route path="/static/add/land_cover_type" element={<StaticAddLandCoverTypePage />} />
+        <Route path="/static/delete/land_cover_type" element={<StaticDeleteLandCoverTypePage />} />
       </Routes>
     </div>
   )

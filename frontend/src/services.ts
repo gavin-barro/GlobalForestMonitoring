@@ -48,6 +48,7 @@ async function requestCreate<T>(endpoint: string, formData: T): Promise<Boolean>
 export const requestCreateUser = async(userForm: UserFormBackend): Promise<Boolean> => requestCreate<UserFormBackend>("users", userForm)
 export const requestCreateRegion = async(regionForm: Region): Promise<Boolean> => requestCreate<Region>("regions", regionForm)
 export const requestCreateForestObservation = async(forestObservationForm: ForestObservationFormBackend): Promise<Boolean> => requestCreate<ForestObservationFormBackend>("forest_observations", forestObservationForm)
+export const requestCreateSubscription = async(subscription: Subscription): Promise<Boolean> => requestCreate<Subscription>("subscriptions", subscription);
 
 // DELETE
 /* Delete a user */
@@ -73,3 +74,7 @@ export const requestCreateLandCoverType = async(lctForm: LCTCreate): Promise<Boo
 
 export const requestDeleteLandCoverType = async(lct_id: number): Promise<Boolean> => 
     requestDelete("land_cover_types", lct_id);
+
+// TODO: requestDeleteSubscription doesn't follow the simpler format as above so might be best to refactor, but using this for now
+export const requestDeleteSubscription = async(user_id: number, metric_id: number, region_id: number): Promise<Boolean> =>
+    requestDelete(`subscriptions/${user_id}/${metric_id}`, region_id)

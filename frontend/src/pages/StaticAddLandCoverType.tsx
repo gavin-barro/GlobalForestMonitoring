@@ -31,20 +31,9 @@ export default function StaticAddLandCoverTypePage() {
                     onSubmit={handleSubmit}
                 >
                     <Form>
-                        <label htmlFor="type_name">Type Name:</label>
-                        <div className="input-option">
-                            <TextInput label="" name="type_name" type="text" />
-                        </div>
-
-                        <label htmlFor="category">Category:</label>
-                        <div className="input-option">
-                            <TextInput label="" name="category" type="text" />
-                        </div>
-
-                        <label htmlFor="description">Description:</label>
-                        <div className="input-option">
-                            <TextInput label="" name="description" type="text" />
-                        </div>
+                        <TextInput label="Type Name" name="type_name" />
+                        <TextInput label="Category" name="category" />
+                        <TextInput label="Description" name="description" />
 
                         <button type="submit" className="button">
                             Submit

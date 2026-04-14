@@ -332,41 +332,51 @@ class SubscriptionRepository(BaseRepository):
         return True
 
 class LCTRepository(BaseRepository):
-    """Repository for LandCoverTypes operations."""
+    """
+        Async repository for LandCoverTypes operations
+    """
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[LandCoverTypes]:
-        return self.db.query(LandCoverTypes).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[LandCoverTypes]:
+        stmt = select(LandCoverTypes).offset(skip).limit(limit)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def get_by_id(self, lct_id: int) -> Optional[LandCoverTypes]:
-        return self.db.query(LandCoverTypes).filter(LandCoverTypes.lct_id == lct_id).first()
+    async def get_by_id(self, lct_id: int) -> Optional[LandCoverTypes]:
+        stmt = select(LandCoverTypes).where(LandCoverTypes.lct_id == lct_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-    def get_by_lct_name(self, lct_type_name: str) -> Optional[LandCoverTypes]:
-        return self.db.query(LandCoverTypes).filter(LandCoverTypes.lct_type_name == lct_type_name).first()
-
-    def create(self, lct_data: LCTCreate) -> LandCoverTypes:
+    async def create(self, lct_data: LCTCreate) -> LandCoverTypes:
         lct = LandCoverTypes(**lct_data.model_dump())
         self.db.add(lct)
-        self.commit()
-        self.refresh(lct)
+        await self.commit()      
+        await self.refresh(lct) 
         return lct
 
-    def update(self, lct_id: int, lct_update: LCTUpdate) -> Optional[LandCoverTypes]:
-        lct = self.get_by_id(lct_id)
-        if lct:
-            lct_data = lct_update.model_dump(exclude_unset=True)
-            for key, value in lct_data.items():
-                setattr(lct, key, value)
-            self.commit()
-            self.refresh(lct)
+    async def update(self, lct_id: int, lct_update: LCTUpdate) -> Optional[LandCoverTypes]:
+        lct = await self.get_by_id(lct_id)
+        if not lct:
+            return None
+
+        update_data = lct_update.model_dump(exclude_unset=True)
+        if update_data:
+            stmt = (
+                update(LandCoverTypes)
+                .where(LandCoverTypes.lct_id == lct_id)
+                .values(**update_data)
+            )
+            await self.db.execute(stmt)
+            await self.commit()
+            await self.refresh(lct)
         return lct
 
-    def delete(self, lct_id: int) -> bool:
-        lct = self.get_by_id(lct_id)
-        if lct:
-            self.db.delete(lct)
-            self.commit()
-            return True
-        return False
+    async def delete(self, lct_id: int) -> bool:
+        lct = await self.get_by_id(lct_id)
+        if not lct:
+            return False
+        await self.db.delete(lct)
+        await self.commit()
+        return True
 
 
 class FORepository(BaseRepository):

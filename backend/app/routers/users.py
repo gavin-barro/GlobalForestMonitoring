@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
 from ..schemas import UserCreate, UserUpdate, UserResponse
 from ..database import get_db
 from ..repositories import UserRepository
@@ -11,7 +10,7 @@ router = APIRouter(
     responses={404: {"description": "User not found"}}
 )
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("/", response_model=list[UserResponse])
 async def get_all_users(skip: int = 0,limit: int = 100,db: AsyncSession = Depends(get_db)):
     """
         Retrieve a paginated list of all users in the system

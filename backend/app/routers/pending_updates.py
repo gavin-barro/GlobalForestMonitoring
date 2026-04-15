@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..schemas import PUCreate, PUUpdate, PUResponse
@@ -12,7 +11,7 @@ router = APIRouter(
     responses={404: {"description": "PendingUpdate not found"}}
 )
 
-@router.get("/", response_model=List[PUResponse])
+@router.get("/", response_model=list[PUResponse])
 async def get_all_pending_updates(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """
         List all PendingUpdates with pagination (for admin/researcher/viewer browsing)

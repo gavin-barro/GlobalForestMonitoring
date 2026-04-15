@@ -1,6 +1,5 @@
 from sqlalchemy import text, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
 
 from .models import (
     Users, Metrics, TimePeriods, LandCoverTypes,
@@ -34,26 +33,26 @@ class BaseRepository:
 class UserRepository(BaseRepository):
     """Repository for User operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Users]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Users]:
         sql_statement = select(Users).from_statement(
             text("SELECT * FROM users OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
-    async def get_by_id(self, user_id: int) -> Optional[Users]:
+    async def get_by_id(self, user_id: int) -> None | Users:
         sql_statement = select(Users).from_statement(
             text("SELECT * FROM users WHERE user_id = :user_id"))
         result = await self.db.execute(sql_statement, {"user_id": user_id})
         return result.scalar_one_or_none()
 
-    async def get_by_username(self, username: str) -> Optional[Users]:
+    async def get_by_username(self, username: str) -> Users | None:
         sql_statement = select(Users).from_statement(
             text("SELECT * FROM users WHERE username = :username"))
         result = await self.db.execute(sql_statement, {"username": username})
         return result.scalar_one_or_none()
 
-    async def get_by_email(self, email: str) -> Optional[Users]:
+    async def get_by_email(self, email: str) -> Users | None:
         sql_statement = select(Users).from_statement(
             text("SELECT * FROM users WHERE email = :email"))
         result = await self.db.execute(sql_statement, {"email": email})
@@ -73,7 +72,7 @@ class UserRepository(BaseRepository):
         await self.refresh(user)
         return user
 
-    async def update(self, user_id: int, user_update: UserUpdate) -> Optional[Users]:
+    async def update(self, user_id: int, user_update: UserUpdate) -> Users | None:
         user = await self.get_by_id(user_id)
         if not user:
             return None
@@ -104,21 +103,21 @@ class UserRepository(BaseRepository):
 class RegionRepository(BaseRepository):
     """Repository for Region operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Regions]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Regions]:
         sql_statement = select(Regions).from_statement(
             text("SELECT * FROM regions OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
-    async def get_by_id(self, region_id: int) -> Optional[Regions]:
+    async def get_by_id(self, region_id: int) -> Regions | None:
         sql_statement = select(Regions).from_statement(
             text("SELECT * FROM regions WHERE region_id = :region_id")
         )
         result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalar_one_or_none()
 
-    async def get_by_region_name(self, region_name: str) -> Optional[Regions]:
+    async def get_by_region_name(self, region_name: str) -> Users | None:
         sql_statement = select(Regions).from_statement(
             text("SELECT * FROM regions WHERE region_name = :region_name")
         )
@@ -139,7 +138,7 @@ class RegionRepository(BaseRepository):
         await self.refresh(region)
         return region
 
-    async def update(self, region_id: int, region_update: RegionUpdate) -> Optional[Regions]:
+    async def update(self, region_id: int, region_update: RegionUpdate) -> Users | None:
     # We check if it exists first
         region = await self.get_by_id(region_id)
         if not region:
@@ -183,21 +182,21 @@ class RegionRepository(BaseRepository):
 class MetricRepository(BaseRepository):
     """Repository for Metric operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Metrics]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Metrics]:
         sql_statement = select(Metrics).from_statement(
             text("SELECT * FROM metrics OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
-    async def get_by_id(self, metric_id: int) -> Optional[Metrics]:
+    async def get_by_id(self, metric_id: int) -> Metrics | None:
         sql_statement = select(Metrics).from_statement(
             text("SELECT * FROM metrics WHERE metric_id = :metric_id")
         )
         result = await self.db.execute(sql_statement, {"metric_id": metric_id})
         return result.scalar_one_or_none()
 
-    async def get_by_metric_name(self, metric_name: str) -> Optional[Metrics]:
+    async def get_by_metric_name(self, metric_name: str) -> Metrics | None:
         sql_statement = select(Metrics).from_statement(
             text("SELECT * FROM metrics WHERE metric_name = :metric_name")
         )
@@ -218,7 +217,7 @@ class MetricRepository(BaseRepository):
         await self.refresh(metric)
         return metric
 
-    async def update(self, metric_id: int, metric_update: MetricUpdate) -> Optional[Metrics]:
+    async def update(self, metric_id: int, metric_update: MetricUpdate) -> Metrics | None:
         metric = await self.get_by_id(metric_id)
         if not metric:
             return None
@@ -251,35 +250,35 @@ class MetricRepository(BaseRepository):
 class SubscriptionRepository(BaseRepository):
     """Repository for Subscription operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[Subscriptions]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Subscriptions]:
         sql_statement = select(Subscriptions).from_statement(
             text("SELECT * FROM subscriptions OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
-    async def get_by_ids(self, user_id: int, metric_id: int, region_id: int) -> Optional[Subscriptions]:
+    async def get_by_ids(self, user_id: int, metric_id: int, region_id: int) -> Subscriptions | None:
         sql_statement = select(Subscriptions).from_statement(
             text("SELECT * FROM subscriptions WHERE user_id = :user_id AND metric_id = :metric_id AND region_id = :region_id")
         )
         result = await self.db.execute(sql_statement, {"user_id": user_id, "metric_id": metric_id, "region_id": region_id})
         return result.scalar_one_or_none()
 
-    async def get_by_user(self, user_id: int) -> List[Subscriptions]:
+    async def get_by_user(self, user_id: int) -> list[Subscriptions]:
         sql_statement = select(Subscriptions).from_statement(
             text("SELECT * FROM subscriptions WHERE user_id = :user_id")
         )
         result = await self.db.execute(sql_statement, {"user_id": user_id})
         return result.scalars().all()
 
-    async def get_by_region(self, region_id: int) -> List[Subscriptions]:
+    async def get_by_region(self, region_id: int) -> list[Subscriptions]:
         sql_statement = select(Subscriptions).from_statement(
             text("SELECT * FROM subscriptions WHERE region_id = :region_id")
         )
         result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalars().all()
 
-    async def get_by_metric(self, metric_id: int) -> List[Subscriptions]:
+    async def get_by_metric(self, metric_id: int) -> list[Subscriptions]:
         sql_statement = select(Subscriptions).from_statement(
             text("SELECT * FROM subscriptions WHERE metric_id = :metric_id")
         )
@@ -300,7 +299,8 @@ class SubscriptionRepository(BaseRepository):
         await self.refresh(sub)
         return sub
 
-    async def update( self, user_id: int, metric_id: int, region_id: int, sub_update: SubscriptionUpdate) -> Optional[Subscriptions]:
+    async def update(self, user_id: int, metric_id: int, region_id: int, 
+                     sub_update: SubscriptionUpdate) -> Subscriptions | None:
         subscription = await self.get_by_ids(user_id, metric_id, region_id)
         if not subscription:
             return None
@@ -336,12 +336,12 @@ class LCTRepository(BaseRepository):
         Async repository for LandCoverTypes operations
     """
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[LandCoverTypes]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[LandCoverTypes]:
         stmt = select(LandCoverTypes).offset(skip).limit(limit)
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_by_id(self, lct_id: int) -> Optional[LandCoverTypes]:
+    async def get_by_id(self, lct_id: int) -> LandCoverTypes | None:
         stmt = select(LandCoverTypes).where(LandCoverTypes.lct_id == lct_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
@@ -353,7 +353,7 @@ class LCTRepository(BaseRepository):
         await self.refresh(lct) 
         return lct
 
-    async def update(self, lct_id: int, lct_update: LCTUpdate) -> Optional[LandCoverTypes]:
+    async def update(self, lct_id: int, lct_update: LCTUpdate) -> LandCoverTypes | None:
         lct = await self.get_by_id(lct_id)
         if not lct:
             return None
@@ -382,21 +382,21 @@ class LCTRepository(BaseRepository):
 class FORepository(BaseRepository):
     """Repository for ForestObservations operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[ForestObservations]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[ForestObservations]:
         sql_statement = select(ForestObservations).from_statement(
             text("SELECT * FROM forest_observations OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
-    async def get_by_id(self, fo_id: int) -> Optional[ForestObservations]:
+    async def get_by_id(self, fo_id: int) -> ForestObservations | None:
         sql_statement = select(ForestObservations).from_statement(
             text("SELECT * FROM forest_observations WHERE observation_id = :observation_id")
         )
         result = await self.db.execute(sql_statement, {"observation_id": fo_id})
         return result.scalar_one_or_none()
 
-    async def get_by_region_id(self, region_id: int) -> Optional[ForestObservations]:
+    async def get_by_region_id(self, region_id: int) -> ForestObservations | None:
         sql_statement = select(ForestObservations).from_statement(
             text("SELECT * FROM forest_observations WHERE describing_region_id = :region_id")
         )
@@ -417,7 +417,7 @@ class FORepository(BaseRepository):
         await self.refresh(fo)
         return fo
 
-    async def update(self, fo_id: int, fo_update: FOUpdate) -> Optional[ForestObservations]:
+    async def update(self, fo_id: int, fo_update: FOUpdate) -> ForestObservations | None:
         fo = await self.get_by_id(fo_id)
         if not fo:
             return None
@@ -449,21 +449,21 @@ class FORepository(BaseRepository):
 class TPRepository(BaseRepository):
     """Repository for TimePeriods operations."""
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> List[TimePeriods]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[TimePeriods]:
         sql_statement = select(TimePeriods).from_statement(
             text("SELECT * FROM time_periods OFFSET :skip LIMIT :limit")
         )
         result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
     
-    async def get_by_id(self, tp_id: int) -> Optional[TimePeriods]:
+    async def get_by_id(self, tp_id: int) -> TimePeriods | None:
         sql_statement = select(TimePeriods).from_statement(
             text("SELECT * FROM time_periods WHERE period_id = :period_id")
         )
         result = await self.db.execute(sql_statement, {"period_id": tp_id})
         return result.scalar_one_or_none()
 
-    async def get_by_tp_name(self, tp_name: str) -> Optional[TimePeriods]:
+    async def get_by_tp_name(self, tp_name: str) -> TimePeriods | None:
         sql_statement = select(TimePeriods).from_statement(
             text("SELECT * FROM time_periods WHERE period_name = :period_name")
         )
@@ -484,7 +484,7 @@ class TPRepository(BaseRepository):
         await self.refresh(tp)
         return tp
 
-    async def update(self, tp_id: int, tp_update: TPUpdate) -> Optional[TimePeriods]:
+    async def update(self, tp_id: int, tp_update: TPUpdate) -> TimePeriods | None:
         tp = await self.get_by_id(tp_id)
         if not tp:
             return None
@@ -513,54 +513,75 @@ class TPRepository(BaseRepository):
         return True
     
 class PURepository(BaseRepository):
-    """Repository for PendingUpdates operations."""
+    """
+        Async repository for PendingUpdates operations
+    """
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[PendingUpdates]:
-        return self.db.query(PendingUpdates).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[PendingUpdates]:
+        stmt = select(PendingUpdates).offset(skip).limit(limit)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def get_by_id(self, pu_id: int) -> Optional[PendingUpdates]:
-        return self.db.query(PendingUpdates).filter(PendingUpdates.pu_id == pu_id).first()
-    
-    def get_by_submitting_user_id(self, su_id: int) -> Optional[PendingUpdates]:
-        return self.db.query(PendingUpdates).filter(PendingUpdates.submitting_user_id == su_id).all()
+    async def get_by_id(self, pu_id: int) -> PendingUpdates | None:
+        stmt = select(PendingUpdates).where(PendingUpdates.update_id == pu_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-    def get_by_active(self) -> Optional[PendingUpdates]:
-        return self.db.query(PendingUpdates).filter(PendingUpdates.status).all()
+    async def get_by_submitting_user_id(self, su_id: int) -> list[PendingUpdates]:
+        stmt = select(PendingUpdates).where(PendingUpdates.submitting_user_id == su_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def create(self, pu_data: PUCreate) -> PendingUpdates:
+    async def get_by_active(self) -> list[PendingUpdates]:
+        # pending updates where status = 'pending'??!?!
+        stmt = select(PendingUpdates).where(PendingUpdates.status == "pending")
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def create(self, pu_data: PUCreate) -> PendingUpdates:
         pu = PendingUpdates(**pu_data.model_dump())
         self.db.add(pu)
-        self.commit()
-        self.refresh(pu)
+        await self.commit()
+        await self.refresh(pu)
         return pu
 
-    def update(self, pu_id: int, pu_update: PUUpdate) -> Optional[PendingUpdates]:
-        pu = self.get_by_id(pu_id)
-        if pu:
-            pu_data = pu_update.model_dump(exclude_unset=True)
-            for key, value in pu_data.items():
-                setattr(pu, key, value)
-            self.commit()
-            self.refresh(pu)
+    async def update(self, pu_id: int, pu_update: PUUpdate) -> PendingUpdates | None:
+        pu = await self.get_by_id(pu_id)
+        if not pu:
+            return None
+
+        update_data = pu_update.model_dump(exclude_unset=True)
+        if update_data:
+            stmt = (
+                update(PendingUpdates)
+                .where(PendingUpdates.update_id == pu_id)
+                .values(**update_data)
+            )
+            await self.db.execute(stmt)
+            await self.commit()
+            await self.refresh(pu)
         return pu
 
-    def delete(self, pu_id: int) -> bool:
-        pu = self.get_by_id(pu_id)
-        if pu:
-            self.db.delete(pu)
-            self.commit()
-            return True
-        return False
+    async def delete(self, pu_id: int) -> bool:
+        pu = await self.get_by_id(pu_id)
+        if not pu:
+            return False
+
+        await self.db.delete(pu)
+        await self.commit()
+        return True
     
 class RCRepository(BaseRepository):
-    """Async repository for RegionClassification operations."""
+    """
+        Async repository for RegionClassification operations
+    """
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[RegionClassification]:
         stmt = select(RegionClassification).offset(skip).limit(limit)
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_by_id(self, region_id: int, lct_id: int) -> Optional[RegionClassification]:
+    async def get_by_id(self, region_id: int, lct_id: int) -> RegionClassification | None:
         stmt = select(RegionClassification).where(
             RegionClassification.region_id == region_id,
             RegionClassification.lct_id == lct_id
@@ -573,7 +594,7 @@ class RCRepository(BaseRepository):
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_by_region_id(self, region_id: int) -> List[RegionClassification]:
+    async def get_by_region_id(self, region_id: int) -> list[RegionClassification]:
         stmt = select(RegionClassification).where(RegionClassification.region_id == region_id)
         result = await self.db.execute(stmt)
         return result.scalars().all()

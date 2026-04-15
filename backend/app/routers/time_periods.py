@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
 from ..schemas import TPCreate, TPUpdate, TPResponse
 from ..database import get_db
 from ..repositories import TPRepository
@@ -11,7 +10,7 @@ router = APIRouter(
     responses={404: {"description": "Time Periods not found"}}
 )
 
-@router.get("/", response_model=List[TPResponse])
+@router.get("/", response_model=list[TPResponse])
 async def get_all_tps(skip: int = 0,limit: int = 100,db: AsyncSession = Depends(get_db)):
     """
         Retrieve a paginated list of all time periods in the system

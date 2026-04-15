@@ -1,6 +1,6 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, 
-    UserFormBackend, UserGet, LandCoverType, LCTCreate } from './types';
+import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, RegionClassification,
+    UserFormBackend, UserGet, LandCoverType, LCTCreate, RegionClassificationCreate, } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -78,3 +78,19 @@ export const requestDeleteLandCoverType = async(lct_id: number): Promise<Boolean
 // TODO: requestDeleteSubscription doesn't follow the simpler format as above so might be best to refactor, but using this for now
 export const requestDeleteSubscription = async(user_id: number, metric_id: number, region_id: number): Promise<Boolean> =>
     requestDelete(`subscriptions/${user_id}/${metric_id}`, region_id)
+
+export const getAllRegionClassifications = async(): Promise<RegionClassification[]> => 
+    fetchAll<RegionClassification>("region_classifications");
+
+export const requestCreateRegionClassification = async(rcForm: RegionClassificationCreate): Promise<Boolean> => 
+    requestCreate<RegionClassificationCreate>("region_classifications", rcForm);
+
+export const requestDeleteRegionClassification = async(lct_id: number, region_id: number): Promise<Boolean> => {
+    try {
+        await axios.delete(`${apiUrl}/region_classifications/${lct_id}/${region_id}`);
+        return true;
+    } catch (error) {
+        console.error("Error deleting region classification:", error);
+        return false;
+    }
+};

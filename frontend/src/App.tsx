@@ -9,8 +9,11 @@ import StaticDeleteRegion from './pages/StaticDeleteRegion';
 import StaticDeleteForestObservation from './pages/StaticDeleteForestObservation';
 import UpdateFeed from './pages/UpdateFeed';
 import SubscriptionFeed from './pages/SubscriptionFeed'
-import StaticAddLandCoverTypePage from "./pages/StaticAddLandCoverType";
-import StaticDeleteLandCoverTypePage from "./pages/StaticDeleteLandCoverType";
+import StaticAddLandCoverType from "./pages/StaticAddLandCoverType";
+import StaticDeleteLandCoverType from "./pages/StaticDeleteLandCoverType";
+import StaticAddRegionClassification from "./pages/StaticAddRegionClassification";
+import StaticDeleteRegionClassification from "./pages/StaticDeleteRegionClassification";
+
 
 function App() {
   return (
@@ -25,8 +28,10 @@ function App() {
         <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
         <Route path="/static/get/feed" element={<UpdateFeed />} />
         <Route path="/static/get/subscription" element={<SubscriptionFeed />} />
-        <Route path="/static/add/land_cover_type" element={<StaticAddLandCoverTypePage />} />
-        <Route path="/static/delete/land_cover_type" element={<StaticDeleteLandCoverTypePage />} />
+        <Route path="/static/add/land_cover_type" element={<StaticAddLandCoverType />} />
+        <Route path="/static/delete/land_cover_type" element={<StaticDeleteLandCoverType />} />
+        <Route path="/static/add/region_classification" element={<StaticAddRegionClassification />} />
+        <Route path="/static/delete/region_classification" element={<StaticDeleteRegionClassification />} />
       </Routes>
     </div>
   )

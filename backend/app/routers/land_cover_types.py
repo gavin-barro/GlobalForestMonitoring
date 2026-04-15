@@ -1,4 +1,3 @@
-# backend/app/routers/land_cover_types.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession

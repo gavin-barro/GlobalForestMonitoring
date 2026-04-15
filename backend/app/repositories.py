@@ -1,4 +1,4 @@
-from sqlalchemy import text, select, update, delete
+from sqlalchemy import text, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -553,35 +553,43 @@ class PURepository(BaseRepository):
         return False
     
 class RCRepository(BaseRepository):
-    """Repository for RegionClassification operations."""
+    """Async repository for RegionClassification operations."""
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[RegionClassification]:
-        return self.db.query(RegionClassification).offset(skip).limit(limit).all()
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[RegionClassification]:
+        stmt = select(RegionClassification).offset(skip).limit(limit)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def get_by_id(self, region_id: int, lct_id: int) -> Optional[RegionClassification]:
-        return self.db.query(RegionClassification).filter(
+    async def get_by_id(self, region_id: int, lct_id: int) -> Optional[RegionClassification]:
+        stmt = select(RegionClassification).where(
             RegionClassification.region_id == region_id,
             RegionClassification.lct_id == lct_id
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        ).first()
-     
-    def get_by_submitting_lct_id(self, lct_id: int) -> Optional[RegionClassification]:
-        return self.db.query(RegionClassification).filter(RegionClassification.lct_id == lct_id).all()
+    async def get_by_lct_id(self, lct_id: int) -> list[RegionClassification]:
+        stmt = select(RegionClassification).where(RegionClassification.lct_id == lct_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def get_by_region_id(self, region_id: int) -> Optional[RegionClassification]:
-        return self.db.query(RegionClassification).filter(RegionClassification.region_id == region_id).all()
+    async def get_by_region_id(self, region_id: int) -> List[RegionClassification]:
+        stmt = select(RegionClassification).where(RegionClassification.region_id == region_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def create(self, rc_data: RCCreate) -> RegionClassification:
+    async def create(self, rc_data: RCCreate) -> RegionClassification:
         rc = RegionClassification(**rc_data.model_dump())
-        self.db.add(rc)
-        self.commit()
-        self.refresh(rc)
+        self.db.add(rc)                  
+        await self.commit()
+        await self.refresh(rc)
         return rc
 
-    def delete(self, rc_id: int) -> bool:
-        rc = self.get_by_id(rc_id)
-        if rc:
-            self.db.delete(rc)
-            self.commit()
-            return True
-        return False
+    async def delete(self, lct_id: int, region_id: int) -> bool:
+        rc = await self.get_by_id(region_id, lct_id)
+        if not rc:
+            return False
+        
+        await self.db.delete(rc)
+        await self.commit()
+        return True

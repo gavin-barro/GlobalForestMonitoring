@@ -3,7 +3,7 @@ import { getAllLandCoverTypes, requestDeleteLandCoverType } from "../services";
 import type { LandCoverType } from "../types";   
 import "./common.css";
 
-export default function StaticDeleteLandCoverTypePage() {
+export default function StaticDeleteLandCoverType() {
     const [landCoverTypes, setLandCoverTypes] = useState<LandCoverType[]>([]);
 
     useEffect(() => {

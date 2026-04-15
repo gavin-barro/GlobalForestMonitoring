@@ -10,7 +10,7 @@ const initialValues: LCTCreate = {
     category: "",
 };
 
-export default function StaticAddLandCoverTypePage() {
+export default function StaticAddLandCoverType() {
     const handleSubmit = async (values: LCTCreate) => {
         console.log("Received Land Cover Type from frontend: " + JSON.stringify(values, null, 2));
 

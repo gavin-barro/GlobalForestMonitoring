@@ -105,3 +105,14 @@ export interface LCTCreate {
     description?: string;
     category: string;
 }
+
+// REGION CLASSIFICATON
+export interface RegionClassification {
+    lct_id: number;
+    region_id: number;
+}
+
+export interface RegionClassificationCreate {
+    lct_id: number;
+    region_id: number;
+}

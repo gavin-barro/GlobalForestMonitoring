@@ -6,7 +6,12 @@ global-forest-watch/
 │   │   ├── database.py
 │   │   ├── models.py
 │   │   ├── schemas.py
-│   │   ├── dependencies.py
+│   │   ├── dependencies/
+│   │   │   └── auth.py
+│   │   │
+│   │   ├── utils/
+│   │   │   └── password.py
+│   │   │
 │   │   ├── routers/
 │   │   │   ├── init.py
 │   │   │   ├── users.py
@@ -16,6 +21,7 @@ global-forest-watch/
 │   │   │   ├── subscriptions.py
 │   │   │   ├── time_periods.py
 │   │   │   └── metrics.py
+│   │   │
 │   │   └── tests/
 │   │       ├── init.py
 │   │       └── test_main.py

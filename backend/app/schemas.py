@@ -189,7 +189,7 @@ class PUResponse(PUBase):
 
 class RCBase(BaseModel):
     lct_id: int
-    region_id: int
+    rc_region_id: int
 
 class RCCreate(RCBase):
     pass

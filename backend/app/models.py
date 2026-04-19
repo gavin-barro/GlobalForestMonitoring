@@ -103,10 +103,10 @@ class Subscriptions(Base):
     region = relationship("Regions", back_populates="subscriptions")
 
 class RegionClassification(Base):
-    __tablename__ = "region_classification"
+    __tablename__ = "region_classifications"
 
     lct_id = Column(Integer, ForeignKey("land_cover_types.lct_id"), primary_key=True)
-    region_id = Column(Integer, ForeignKey("regions.region_id"), primary_key=True)
+    rc_region_id = Column(Integer, ForeignKey("regions.region_id"), primary_key=True)
 
     # Back populations
     land_cover_type = relationship("LandCoverTypes", back_populates="classifications")

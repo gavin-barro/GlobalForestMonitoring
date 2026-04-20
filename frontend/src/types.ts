@@ -1,4 +1,15 @@
 // USER
+export type UserProfileToken = {
+    username: string;
+    email: string;
+    token: string;
+}
+
+export type UserProfile = {
+    username: string;
+    email: string;
+}
+
 // TODO: The backend should be modified to accept UserForm and intuit the other fields
 export interface UserFormBackend {
     user_id: number;

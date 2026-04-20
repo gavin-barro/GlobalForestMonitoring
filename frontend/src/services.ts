@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse } from 'axios';
 import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, RegionClassification,
-    UserFormBackend, UserGet, LandCoverType, LCTCreate, RegionClassificationCreate, } from './types';
+    UserFormBackend, UserGet, LandCoverType, LCTCreate, RegionClassificationCreate,
+    UserProfileToken, } from './types';
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -9,6 +10,20 @@ import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region
 //   `${import.meta.env.BASE_URL}/api`
 // NOTE: This MUST be updated in future :^)
 const apiUrl = "http://localhost:8000"
+
+export const loginAPI = async (username: string, password: string) => {
+    try {
+        const data = await axios.post<UserProfileToken>(apiUrl + "/users/login", null, {
+            params: {
+                username,
+                password,
+            },
+        });
+        return data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 // TODO: Implement returning helpful error responses from requests
 

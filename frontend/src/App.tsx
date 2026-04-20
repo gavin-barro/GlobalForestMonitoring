@@ -13,13 +13,17 @@ import StaticAddLandCoverType from "./pages/StaticAddLandCoverType";
 import StaticDeleteLandCoverType from "./pages/StaticDeleteLandCoverType";
 import StaticAddRegionClassification from "./pages/StaticAddRegionClassification";
 import StaticDeleteRegionClassification from "./pages/StaticDeleteRegionClassification";
+import UserLogin from "./pages/UserLogin"
+import { UserProvider } from './context/useAuth';
 
 
 function App() {
   return (
+    <UserProvider>
     <div className="app">
       <AppHeader />
       <Routes>
+        <Route path="/account/login" element={<UserLogin />} />
         <Route path="/static/add/region" element={<StaticAddRegion />} />
         <Route path="/static/add/user" element={<StaticAddUser />} />
         <Route path="/static/add/forest_observation" element={<StaticAddForestObservation />} />
@@ -34,6 +38,7 @@ function App() {
         <Route path="/static/delete/region_classification" element={<StaticDeleteRegionClassification />} />
       </Routes>
     </div>
+    </UserProvider>
   )
 }
 

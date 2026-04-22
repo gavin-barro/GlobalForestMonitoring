@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from ..schemas import PUCreate, PUUpdate, PUResponse
 from ..database import get_db
@@ -20,6 +21,17 @@ async def get_all_pending_updates(skip: int = 0, limit: int = 100, db: AsyncSess
     pu = await repository.get_all(skip=skip, limit=limit)
     return pu
 
+@router.get("/pending", response_model=List[PUResponse])
+async def get_active_pending_update(db: AsyncSession = Depends(get_db)):
+    """
+        Get a list of pending updates that are active
+    """
+    repository = PURepository(db)
+    pu = await repository.get_by_pending()
+    if pu is None:
+        raise HTTPException(status_code=404, detail="No active PendingUpdate found")
+    return pu
+
 @router.get("/{pu_id}", response_model=PUResponse)
 async def get_pending_update(pu_id: int, db: AsyncSession = Depends(get_db)):
     """
@@ -30,6 +42,18 @@ async def get_pending_update(pu_id: int, db: AsyncSession = Depends(get_db)):
     if pu is None:
         raise HTTPException(status_code=404, detail="PendingUpdate not found")
     return pu
+
+@router.get("/submitting_user_id/{su_id}", response_model=List[PUResponse])
+async def get_pending_update_by_submitting_user_id(su_id: int, db: AsyncSession = Depends(get_db)):
+    """
+        Get a list of PendingUpdates by submitting_user_id
+    """
+    repository = PURepository(db)
+    pu = await repository.get_by_submitting_user_id(su_id)
+    if pu is None:
+        raise HTTPException(status_code=404, detail="PendingUpdate not found for user")
+    return pu
+
 
 @router.post("/", response_model=PUResponse, status_code=status.HTTP_201_CREATED)
 async def create_pending_update(pu_data: PUCreate, db: AsyncSession = Depends(get_db)):

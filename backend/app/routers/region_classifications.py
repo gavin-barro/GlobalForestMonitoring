@@ -21,14 +21,24 @@ async def get_all_region_classifications(skip: int = 0,limit: int = 100,db: Asyn
     rcs = await repo.get_all(skip=skip, limit=limit)
     return rcs
 
-@router.get("/{lct_id}", response_model=List[RCResponse])
-async def get_all_lct_region_classifications(lct_id: int, db: AsyncSession = Depends(get_db)):
+@router.get("/lct/{lct_id}", response_model=List[RCResponse])
+async def get_all_lct_classifications(lct_id: int, db: AsyncSession = Depends(get_db)):
     """
         Retrieve a paginated list of all Region Classifications in the system
         Useful for admin overview or researcher lookups
     """
     repo = RCRepository(db)
-    rcs = await repo.get_by_submitting_lct_id(lct_id)
+    rcs = await repo.get_by_lct_id(lct_id)
+    return rcs
+
+@router.get("/region/{region_id}", response_model=List[RCResponse])
+async def get_all_region_classifications(region_id: int, db: AsyncSession = Depends(get_db)):
+    """
+        Retrieve a paginated list of all Region Classifications in the system
+        Useful for admin overview or researcher lookups
+    """
+    repo = RCRepository(db)
+    rcs = await repo.get_by_region_id(region_id=region_id)
     return rcs
 
 @router.get("/{region_id}/{lct_id}", response_model=RCResponse)

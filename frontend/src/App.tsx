@@ -21,7 +21,6 @@ import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
   return (
-    <div className="app">
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard/guest" element={<GuestDashboard />} />
@@ -41,7 +40,6 @@ function App() {
         <Route path="/static/add/region_classification" element={<StaticAddRegionClassification />} />
         <Route path="/static/delete/region_classification" element={<StaticDeleteRegionClassification />} />
       </Routes>
-    </div>
   )
 }
 

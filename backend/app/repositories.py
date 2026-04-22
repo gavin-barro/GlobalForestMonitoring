@@ -1,5 +1,6 @@
 from sqlalchemy import text, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
 
 from .models import (
     Users, Metrics, TimePeriods, LandCoverTypes,
@@ -332,27 +333,43 @@ class SubscriptionRepository(BaseRepository):
         return True
 
 class LCTRepository(BaseRepository):
-    """
-        Async repository for LandCoverTypes operations
-    """
+    """Repository for LandCoverTypes operations."""
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[LandCoverTypes]:
-        stmt = select(LandCoverTypes).offset(skip).limit(limit)
-        result = await self.db.execute(stmt)
+        sql_statement = select(LandCoverTypes).from_statement(
+            text("SELECT * FROM land_cover_types OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
-
+    
     async def get_by_id(self, lct_id: int) -> LandCoverTypes | None:
-        stmt = select(LandCoverTypes).where(LandCoverTypes.lct_id == lct_id)
-        result = await self.db.execute(stmt)
+        sql_statement = select(LandCoverTypes).from_statement(
+            text("SELECT * FROM land_cover_types WHERE lct_id = :lct_id")
+        )
+        result = await self.db.execute(sql_statement, {"lct_id": lct_id})
+        return result.scalar_one_or_none()
+
+    async def get_by_lct_name(self, type_name: str) -> LandCoverTypes | None:
+        sql_statement = select(LandCoverTypes).from_statement(
+            text("SELECT * FROM land_cover_types WHERE type_name = :type_name")
+        )
+        result = await self.db.execute(sql_statement, {"type_name": type_name})
         return result.scalar_one_or_none()
 
     async def create(self, lct_data: LCTCreate) -> LandCoverTypes:
-        lct = LandCoverTypes(**lct_data.model_dump())
-        self.db.add(lct)
-        await self.commit()      
-        await self.refresh(lct) 
-        return lct
+        data = lct_data.model_dump()
+        sql = select(LandCoverTypes).from_statement(
+            text("INSERT INTO land_cover_types (type_name, category, description) \
+                    VALUES (:type_name, :category, :description) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql, data)
+        lct = result.scalar_one()
 
+        await self.commit()
+        await self.refresh(lct)
+        return lct
+    
     async def update(self, lct_id: int, lct_update: LCTUpdate) -> LandCoverTypes | None:
         lct = await self.get_by_id(lct_id)
         if not lct:
@@ -360,12 +377,14 @@ class LCTRepository(BaseRepository):
 
         update_data = lct_update.model_dump(exclude_unset=True)
         if update_data:
-            stmt = (
-                update(LandCoverTypes)
-                .where(LandCoverTypes.lct_id == lct_id)
-                .values(**update_data)
-            )
-            await self.db.execute(stmt)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "lct_id": lct_id}
+            sql_statement = select(LandCoverTypes).from_statement(text(f"""
+                                 UPDATE land_cover_types
+                                 SET {set_clause}
+                                 WHERE lct_id = :lct_id
+                                 RETURNING *"""))
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(lct)
         return lct
@@ -374,7 +393,8 @@ class LCTRepository(BaseRepository):
         lct = await self.get_by_id(lct_id)
         if not lct:
             return False
-        await self.db.delete(lct)
+        sql = text("DELETE FROM land_cover_types WHERE lct_id = :lct_id")
+        await self.db.execute(sql, {"lct_id": lct_id})
         await self.commit()
         return True
 
@@ -517,57 +537,73 @@ class PURepository(BaseRepository):
         Async repository for PendingUpdates operations
     """
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> list[PendingUpdates]:
-        stmt = select(PendingUpdates).offset(skip).limit(limit)
-        result = await self.db.execute(stmt)
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[PendingUpdates]:
+        sql_statement = select(PendingUpdates).from_statement(
+            text("SELECT * FROM pending_updates OFFSET :skip LIMIT :limit")
+        )
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
         return result.scalars().all()
 
-    async def get_by_id(self, pu_id: int) -> PendingUpdates | None:
-        stmt = select(PendingUpdates).where(PendingUpdates.update_id == pu_id)
-        result = await self.db.execute(stmt)
+    async def get_by_id(self, update_id: int) -> Optional[PendingUpdates]:
+        sql_statement = select(PendingUpdates).from_statement(
+            text("SELECT * FROM pending_updates WHERE update_id = :update_id")
+        )
+        result = await self.db.execute(sql_statement, {"update_id": update_id})
         return result.scalar_one_or_none()
-
-    async def get_by_submitting_user_id(self, su_id: int) -> list[PendingUpdates]:
-        stmt = select(PendingUpdates).where(PendingUpdates.submitting_user_id == su_id)
-        result = await self.db.execute(stmt)
+    
+    async def get_by_submitting_user_id(self, su_id: int) -> Optional[PendingUpdates]:
+        sql_statement = select(PendingUpdates).from_statement(
+            text("SELECT * FROM pending_updates WHERE submitting_user_id = :su_id")
+        )
+        result = await self.db.execute(sql_statement, {"su_id": su_id})
         return result.scalars().all()
 
-    async def get_by_active(self) -> list[PendingUpdates]:
-        # pending updates where status = 'pending'??!?!
-        stmt = select(PendingUpdates).where(PendingUpdates.status == "pending")
-        result = await self.db.execute(stmt)
+    async def get_by_pending(self) -> Optional[PendingUpdates]:
+        sql_statement = select(PendingUpdates).from_statement(
+            text("SELECT * FROM pending_updates WHERE status = 'Pending'")
+        )
+        result = await self.db.execute(sql_statement)
         return result.scalars().all()
 
     async def create(self, pu_data: PUCreate) -> PendingUpdates:
-        pu = PendingUpdates(**pu_data.model_dump())
-        self.db.add(pu)
+        data = pu_data.model_dump()
+        sql = select(PendingUpdates).from_statement(
+            text("INSERT INTO pending_updates (submit_date, proposed_value, reason, status, submitting_user_id, forest_observation_id) \
+                    VALUES (:submit_date, :proposed_value, :reason, :status, :submitting_user_id, :observation_id) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql, data)
+        pu = result.scalar_one()
+
         await self.commit()
         await self.refresh(pu)
         return pu
 
-    async def update(self, pu_id: int, pu_update: PUUpdate) -> PendingUpdates | None:
-        pu = await self.get_by_id(pu_id)
+    async def update(self, update_id: int, pu_update: PUUpdate) -> Optional[PendingUpdates]:
+        pu = await self.get_by_id(update_id)
         if not pu:
             return None
 
         update_data = pu_update.model_dump(exclude_unset=True)
         if update_data:
-            stmt = (
-                update(PendingUpdates)
-                .where(PendingUpdates.update_id == pu_id)
-                .values(**update_data)
-            )
-            await self.db.execute(stmt)
+            set_clause = ", ".join([f"{key} = :{key}" for key in update_data.keys()])
+            params = {**update_data, "update_id": update_id}
+            sql_statement = select(PendingUpdates).from_statement(text(f"""
+                                 UPDATE pending_updates
+                                 SET {set_clause}
+                                 WHERE update_id = :update_id
+                                 RETURNING *"""))
+            await self.db.execute(sql_statement, params)
             await self.commit()
             await self.refresh(pu)
         return pu
 
-    async def delete(self, pu_id: int) -> bool:
-        pu = await self.get_by_id(pu_id)
+    async def delete(self, update_id: int) -> bool:
+        pu = await self.get_by_id(update_id)
         if not pu:
             return False
-
-        await self.db.delete(pu)
+        sql = text("DELETE FROM pending_updates WHERE update_id = :update_id")
+        await self.db.execute(sql, {"update_id": update_id})
         await self.commit()
         return True
     
@@ -576,41 +612,53 @@ class RCRepository(BaseRepository):
         Async repository for RegionClassification operations
     """
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> list[RegionClassification]:
-        stmt = select(RegionClassification).offset(skip).limit(limit)
-        result = await self.db.execute(stmt)
-        return result.scalars().all()
-
-    async def get_by_id(self, region_id: int, lct_id: int) -> RegionClassification | None:
-        stmt = select(RegionClassification).where(
-            RegionClassification.region_id == region_id,
-            RegionClassification.lct_id == lct_id
+    async def get_all(self, skip: int = 0, limit: int = 100) -> List[RegionClassification]:
+        sql_statement = select(RegionClassification).from_statement(
+            text("SELECT * FROM region_classifications OFFSET :skip LIMIT :limit")
         )
-        result = await self.db.execute(stmt)
+        result = await self.db.execute(sql_statement, {"skip": skip, "limit": limit})
+        return result.scalars().all()
+    
+    async def get_by_id(self, region_id: int, lct_id) -> Optional[RegionClassification]:
+        sql_statement = select(RegionClassification).from_statement(
+            text("SELECT * FROM region_classifications WHERE rc_region_id = :region_id AND lct_id = :lct_id")
+        )
+        result = await self.db.execute(sql_statement, {"region_id": region_id, "lct_id": lct_id})
         return result.scalar_one_or_none()
-
-    async def get_by_lct_id(self, lct_id: int) -> list[RegionClassification]:
-        stmt = select(RegionClassification).where(RegionClassification.lct_id == lct_id)
-        result = await self.db.execute(stmt)
+    
+    async def get_by_region_id(self, region_id: int) -> Optional[RegionClassification]:
+        sql_statement = select(RegionClassification).from_statement(
+            text("SELECT * FROM region_classifications WHERE rc_region_id = :region_id")
+        )
+        result = await self.db.execute(sql_statement, {"region_id": region_id})
         return result.scalars().all()
 
-    async def get_by_region_id(self, region_id: int) -> list[RegionClassification]:
-        stmt = select(RegionClassification).where(RegionClassification.region_id == region_id)
-        result = await self.db.execute(stmt)
+    async def get_by_lct_id(self, lct_id: int) -> Optional[RegionClassification]:
+        sql_statement = select(RegionClassification).from_statement(
+            text("SELECT * FROM region_classifications WHERE lct_id = :lct_id")
+        )
+        result = await self.db.execute(sql_statement, {"lct_id": lct_id})
         return result.scalars().all()
 
     async def create(self, rc_data: RCCreate) -> RegionClassification:
-        rc = RegionClassification(**rc_data.model_dump())
-        self.db.add(rc)                  
+        data = rc_data.model_dump()
+        sql = select(RegionClassification).from_statement(
+            text("INSERT INTO region_classifications (rc_region_id, lct_id) \
+                    VALUES (:rc_region_id, :lct_id) \
+                    RETURNING *")
+        )
+        result = await self.db.execute(sql, data)
+        rc = result.scalar_one()
+
         await self.commit()
         await self.refresh(rc)
         return rc
 
-    async def delete(self, lct_id: int, region_id: int) -> bool:
+    async def delete(self, region_id: int, lct_id: int) -> bool:
         rc = await self.get_by_id(region_id, lct_id)
         if not rc:
             return False
-        
-        await self.db.delete(rc)
+        sql = text("DELETE FROM region_classifications WHERE rc_region_id = :region_id AND lct_id = :lct_id")
+        await self.db.execute(sql, {"region_id": region_id, "lct_id": lct_id})
         await self.commit()
         return True

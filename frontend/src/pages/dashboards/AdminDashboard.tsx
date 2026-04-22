@@ -1,0 +1,52 @@
+import { Link } from "react-router-dom";
+import "./dashboard.css";
+
+export default function AdminDashboard() {
+  const username = localStorage.getItem("username") || "Admin";
+
+  return (
+    <div className="page home-page">
+      <div className="home-container">
+        <div className="home-header">
+          <h2 className="welcome-banner">Welcome Admin, {username}!</h2>
+          <h1 className="home-title">Administrator Command</h1>
+          <p className="home-subtitle">Total System Management</p>
+        </div>
+
+        <div className="dashboard-grid">
+          <Link to="/static/add/region" className="dashboard-card">
+            <div className="card-icon" style={{ background: "#e8f5e9" }}>🗺️</div>
+            <div className="card-content">
+              <h3>Manage Regions</h3>
+              <p>Add new regions, hide regions of concern</p>
+            </div>
+          </Link>
+
+          <Link to="/static/add/user" className="dashboard-card">
+            <div className="card-icon" style={{ background: "#e3f2fd" }}>👥</div>
+            <div className="card-content">
+              <h3>User Management</h3>
+              <p>Add, remove, and manage user roles</p>
+            </div>
+          </Link>
+
+          <Link to="/data-management" className="dashboard-card">
+            <div className="card-icon" style={{ background: "#fff3e0" }}>⚙️</div>
+            <div className="card-content">
+              <h3>Data Management</h3>
+              <p>Delete incorrect data or hide sensitive points</p>
+            </div>
+          </Link>
+
+          <Link to="/pending-approvals" className="dashboard-card">
+            <div className="card-icon" style={{ background: "#f3e5f5" }}>✅</div>
+            <div className="card-content">
+              <h3>Pending Approvals</h3>
+              <p>Review and accept researcher updates</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

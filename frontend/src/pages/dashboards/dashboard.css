@@ -1,0 +1,116 @@
+/* Dashboard Shared Styles */
+.home-page {
+  min-height: 100vh;
+  background-color: #E6E1D6; /* Richer, darker earthy cream */
+  background-image: radial-gradient(circle at top right, rgba(255,255,255,0.4) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(220,210,190,0.5) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.home-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.welcome-banner {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2D6A4F;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.home-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1b4332;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.home-subtitle {
+  font-size: 1.4rem;
+  color: #5C6E61;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.home-team {
+  color: #666;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Dashboard grid (horizontal cards)  */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dashboard-card {
+  background: rgba(255, 255, 255, 0.45); /* Glassmorphic */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.card-content h3 {
+  margin: 0 0 0.4rem 0;
+  font-size: 1.25rem;
+  color: #1b4332;
+  font-weight: 700;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #3A4F41;
+  line-height: 1.4;
+}
+
+.home-footer {
+  text-align: center;
+  margin-top: 4rem;
+  color: #888;
+  font-size: 0.9rem;
+}

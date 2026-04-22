@@ -1,5 +1,4 @@
 import './App.css'
-import AppHeader from './components/AppHeader'
 import { Routes, Route } from "react-router-dom";
 import StaticAddRegion from "./pages/StaticAddRegion";
 import StaticAddUser from "./pages/StaticAddUser";
@@ -13,13 +12,22 @@ import StaticAddLandCoverType from "./pages/StaticAddLandCoverType";
 import StaticDeleteLandCoverType from "./pages/StaticDeleteLandCoverType";
 import StaticAddRegionClassification from "./pages/StaticAddRegionClassification";
 import StaticDeleteRegionClassification from "./pages/StaticDeleteRegionClassification";
+import Login from "./pages/LoginPage";
+import GuestDashboard from "./pages/dashboards/GuestDashboard";
+import ViewerDashboard from "./pages/dashboards/ViewerDashboard";
+import ResearcherDashboard from "./pages/dashboards/ResearcherDashboard";
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 
 function App() {
   return (
     <div className="app">
-      <AppHeader />
       <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard/guest" element={<GuestDashboard />} />
+        <Route path="/dashboard/viewer" element={<ViewerDashboard />} />
+        <Route path="/dashboard/researcher" element={<ResearcherDashboard />} />
+        <Route path="/dashboard/admin" element={<AdminDashboard />} />
         <Route path="/static/add/region" element={<StaticAddRegion />} />
         <Route path="/static/add/user" element={<StaticAddUser />} />
         <Route path="/static/add/forest_observation" element={<StaticAddForestObservation />} />

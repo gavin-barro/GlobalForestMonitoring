@@ -1,7 +1,7 @@
 /* Dashboard Shared Styles */
 .home-page {
   min-height: 100vh;
-  background-color: #E6E1D6; /* Richer, darker earthy cream */
+  background-color: #E6E1D6; /* Darker cream */
   background-image: radial-gradient(circle at top right, rgba(255,255,255,0.4) 0%, transparent 40%),
                     radial-gradient(circle at bottom left, rgba(220,210,190,0.5) 0%, transparent 50%);
   display: flex;
@@ -62,7 +62,7 @@
 }
 
 .dashboard-card {
-  background: rgba(255, 255, 255, 0.45); /* Glassmorphic */
+  background: rgba(255, 255, 255, 0.45); /* Glassmorphic feel */
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 20px;

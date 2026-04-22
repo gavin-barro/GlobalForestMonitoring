@@ -1,9 +1,9 @@
 /* Login Page */
 .login-page {
   min-height: 100vh;
-  background-color: #E6E1D6; /* Richer, darker earthy cream */
-  background-image: radial-gradient(circle at top right, rgba(255,255,255,0.4) 0%, transparent 40%),
-                    radial-gradient(circle at bottom left, rgba(220,210,190,0.5) 0%, transparent 50%);
+  background-color: #E6E1D6;
+  background-image: radial-gradient(circle at top right, rgba(255, 255, 255, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at bottom left, rgba(220, 210, 190, 0.5) 0%, transparent 50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,12 +15,13 @@
   display: flex;
   max-width: 1040px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.35); /* Glassmorphic background */
+  /* cream color */
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 36px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.06), 
-              inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
@@ -28,7 +29,7 @@
 .login-left {
   flex: 1;
   padding: 70px 60px;
-  background: transparent; /* Removed discordant white/grey contrast */
+  background: transparent;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -41,20 +42,22 @@
   top: 10%;
   height: 80%;
   width: 1px;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.06), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.06), transparent);
 }
 
 .login-brand h1 {
   font-size: 2.8rem;
   font-weight: 800;
-  color: #1b4332; /* Deep forest green */
+  color: #1b4332;
+  /* Deep forest green */
   margin: 0 0 12px 0;
   letter-spacing: -1px;
 }
 
 .login-brand .subtitle {
   font-size: 1.15rem;
-  color: #5C6E61; /* Greenish grey */
+  color: #5C6E61;
+  /* greenish grey */
   margin: 0;
   font-weight: 500;
 }
@@ -130,6 +133,7 @@
   color: #1b4332;
   font-family: inherit;
 }
+
 .login-right input:focus {
   outline: none;
   border-color: #2D6A4F;
@@ -142,7 +146,8 @@
   padding: 16px;
   font-size: 1.1rem;
   font-weight: 600;
-  background: #2D6A4F; /* Deep rich green */
+  background: #2D6A4F;
+  /* Deeper green */
   color: white;
   border: none;
   border-radius: 14px;

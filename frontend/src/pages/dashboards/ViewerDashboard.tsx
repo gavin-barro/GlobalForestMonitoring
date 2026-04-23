@@ -1,11 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./dashboard.css";
 
 export default function ViewerDashboard() {
   const username = localStorage.getItem("username") || "Viewer";
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div className="page home-page">
+      <div className="logout-container" style={{ position: "absolute", top: "2rem", right: "2rem" }}>
+        <button onClick={handleLogout} style={{ background: "rgba(220, 53, 69, 0.1)", color: "#dc3545", border: "1px solid #dc3545", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Logout</button>
+      </div>
       <div className="home-container">
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Viewer, {username}!</h2>
@@ -14,35 +23,27 @@ export default function ViewerDashboard() {
         </div>
 
         <div className="dashboard-grid">
-          <Link to="/search" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#e8f5e9" }}>🔍</div>
+          <Link to="/dashboard/viewer/search" className="dashboard-card">
+            <div className="card-icon" style={{ background: "rgba(102, 187, 106, 0.15)", color: "#2D6A4F" }}>🔍</div>
             <div className="card-content">
               <h3>Search & Map</h3>
-              <p>Find and view regions on the interactive map</p>
+              <p>Explore regions globally and save them to your watchlist</p>
             </div>
           </Link>
 
-          <Link to="/saved" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#e3f2fd" }}>⭐</div>
+          <Link to="/dashboard/viewer/saved" className="dashboard-card">
+            <div className="card-icon" style={{ background: "rgba(255, 152, 0, 0.15)", color: "#ff9800" }}>⭐</div>
             <div className="card-content">
-              <h3>Saved Regions</h3>
-              <p>Track your saved regions and specific data trends</p>
+              <h3>Saved Regions & Trends</h3>
+              <p>View your pinned regions and analyze historical forest datasets</p>
             </div>
           </Link>
 
           <Link to="/static/get/subscription" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#fff3e0" }}>🔔</div>
+            <div className="card-icon" style={{ background: "rgba(33, 150, 243, 0.15)", color: "#2196f3" }}>🔔</div>
             <div className="card-content">
-              <h3>Subscriptions</h3>
-              <p>Subscribe to feed changes in specific categories</p>
-            </div>
-          </Link>
-
-          <Link to="/historical" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#f3e5f5" }}>📈</div>
-            <div className="card-content">
-              <h3>Historical Trends</h3>
-              <p>Scroll through time for areas of interest</p>
+              <h3>Updates Feed</h3>
+              <p>Monitor real-time changes and reports for your regions</p>
             </div>
           </Link>
         </div>

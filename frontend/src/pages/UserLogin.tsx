@@ -1,6 +1,5 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
 type LoginFormValues = {
@@ -15,7 +14,7 @@ const initialValues: LoginFormValues = {
 
 export default function UserLoginPage() {
     const { loginUser } = useAuth();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const handleSubmit = async (values: LoginFormValues) => {
         console.log("Logging in with:", values);
 

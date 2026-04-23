@@ -17,6 +17,10 @@ import GuestDashboard from "./pages/dashboards/GuestDashboard";
 import ViewerDashboard from "./pages/dashboards/ViewerDashboard";
 import ResearcherDashboard from "./pages/dashboards/ResearcherDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import SearchMap from "./pages/Viewer/SearchMap";
+import SavedRegions from "./pages/Viewer/SavedRegions";
+import HistoricalTrends from "./pages/Viewer/HistoricalTrends";
+import PublicRegions from "./pages/PublicRegions";
 
 
 function App() {
@@ -25,6 +29,9 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard/guest" element={<GuestDashboard />} />
         <Route path="/dashboard/viewer" element={<ViewerDashboard />} />
+        <Route path="/dashboard/viewer/search" element={<SearchMap />} />
+        <Route path="/dashboard/viewer/saved" element={<SavedRegions />} />
+        <Route path="/dashboard/viewer/historical" element={<HistoricalTrends />} />
         <Route path="/dashboard/researcher" element={<ResearcherDashboard />} />
         <Route path="/dashboard/admin" element={<AdminDashboard />} />
         <Route path="/static/add/region" element={<StaticAddRegion />} />
@@ -35,6 +42,7 @@ function App() {
         <Route path="/static/delete/forest_observation" element={<StaticDeleteForestObservation />} />
         <Route path="/static/get/feed" element={<UpdateFeed />} />
         <Route path="/static/get/subscription" element={<SubscriptionFeed />} />
+        <Route path="/regions" element={<PublicRegions />} />
         <Route path="/static/add/land_cover_type" element={<StaticAddLandCoverType />} />
         <Route path="/static/delete/land_cover_type" element={<StaticDeleteLandCoverType />} />
         <Route path="/static/add/region_classification" element={<StaticAddRegionClassification />} />

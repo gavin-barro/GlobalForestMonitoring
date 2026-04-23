@@ -125,6 +125,13 @@ class RegionRepository(BaseRepository):
         result = await self.db.execute(sql_statement, {"region_name": region_name})
         return result.scalar_one_or_none()
 
+    async def search_by_region_name_partial(self, query: str) -> list[Regions]:
+        sql_statement = select(Regions).from_statement(
+            text("SELECT * FROM regions WHERE region_name ILIKE :query")
+        )
+        result = await self.db.execute(sql_statement, {"query": f"%{query}%"})
+        return result.scalars().all()
+
     async def create(self, region_data: RegionCreate) -> Regions:
         data = region_data.model_dump()
         sql_statement = select(Regions).from_statement(

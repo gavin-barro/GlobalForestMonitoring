@@ -1,16 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./dashboard.css";
 
 export default function AdminDashboard() {
   const username = localStorage.getItem("username") || "Admin";
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div className="page home-page">
+      <div className="logout-container" style={{ position: "absolute", top: "2rem", right: "2rem" }}>
+        <button onClick={handleLogout} style={{ background: "rgba(220, 53, 69, 0.1)", color: "#dc3545", border: "1px solid #dc3545", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Logout</button>
+      </div>
       <div className="home-container">
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Admin, {username}!</h2>
-          <h1 className="home-title">Administrator Command</h1>
-          <p className="home-subtitle">Total System Management</p>
+          <h1 className="home-title">Administrator Console</h1>
+          <p className="home-subtitle">System Overwatch & User Management</p>
         </div>
 
         <div className="dashboard-grid">

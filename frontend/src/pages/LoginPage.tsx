@@ -48,13 +48,16 @@ export default function Login() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("username", values.username);
 
-      // Decode JWT to get the account type
+      // Decode JWT to get the account type and user ID
       let role = "Guest";
       try {
         const payloadStr = atob(data.access_token.split('.')[1]);
         const payload = JSON.parse(payloadStr);
         if (payload.acct_type) {
           role = payload.acct_type;
+        }
+        if (payload.sub) {
+          localStorage.setItem("user_id", payload.sub);
         }
       } catch (e) {
         console.error("Failed to parse JWT", e);

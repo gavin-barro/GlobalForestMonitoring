@@ -1,16 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./dashboard.css";
 
 export default function ResearcherDashboard() {
   const username = localStorage.getItem("username") || "Researcher";
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div className="page home-page">
+      <div className="logout-container" style={{ position: "absolute", top: "2rem", right: "2rem" }}>
+        <button onClick={handleLogout} style={{ background: "rgba(220, 53, 69, 0.1)", color: "#dc3545", border: "1px solid #dc3545", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Logout</button>
+      </div>
       <div className="home-container">
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Researcher, {username}!</h2>
-          <h1 className="home-title">Researcher Portal</h1>
-          <p className="home-subtitle">Advanced Analytics & Data Curation</p>
+          <h1 className="home-title">Researcher Workbench</h1>
+          <p className="home-subtitle">Data Analysis & Forest Insight</p>
         </div>
 
         <div className="dashboard-grid">

@@ -80,7 +80,7 @@ async def create_fo(fo_data: FOCreate, db: AsyncSession = Depends(get_db)):
 @router.patch("/{fo_id}", response_model=FOResponse)
 async def update_fo(fo_id: int, fo_update: FOUpdate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Partially update ForestObservation information
+        ADMIN ONLY: Partially update ForestObservation information
         Only fields provided in request body are changed
     """
     repo = FORepository(db)

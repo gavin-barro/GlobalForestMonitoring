@@ -116,7 +116,7 @@ async def update_pending_update(pu_id: int, pu_update: PUUpdate, db: AsyncSessio
 @router.patch("/approve/{pu_id}", response_model=PUResponse)
 async def approve_pending_update(pu_id: int, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Approve a PendingUpdate (set pending=False, apply changes to parent if applicable)
+        ADMIN ONLY: Approve a PendingUpdate (set pending=False, apply changes to parent if applicable)
     """
     repository = PURepository(db)
 

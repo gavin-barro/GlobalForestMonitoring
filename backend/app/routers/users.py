@@ -127,7 +127,7 @@ async def login( username: str, password: str, db: AsyncSession = Depends(get_db
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_db), 
                       admin: dict = Depends(get_admin_user)) -> None:
     """
-        Delete a user account by ID - ADMIN ONLY
+        ADMIN ONLY: Delete a user account by ID
     """
     repo = UserRepository(db)
     success = await repo.delete(user_id)

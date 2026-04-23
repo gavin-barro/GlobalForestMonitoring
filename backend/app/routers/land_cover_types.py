@@ -48,7 +48,7 @@ async def get_LandCoverType_by_name(lct_name: str, db: AsyncSession = Depends(ge
 @router.post("/", response_model=LCTResponse, status_code=status.HTTP_201_CREATED)
 async def create_LandCoverType(lct_data: LCTCreate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Create a new LandCoverType — supports hierarchy via parent_LandCoverType_id
+        ADMIN ONLY: Create a new LandCoverType — supports hierarchy via parent_LandCoverType_id
     """
     repository = LCTRepository(db)
 
@@ -56,9 +56,9 @@ async def create_LandCoverType(lct_data: LCTCreate, db: AsyncSession = Depends(g
     return new_LandCoverType
 
 @router.patch("/{lct_id}", response_model=LCTResponse)
-async def update_LandCoverType(lct_id: int, LandCoverType_update: LCTUpdate, db: AsyncSession = Depends(get_db)):
+async def update_LandCoverType(lct_id: int, LandCoverType_update: LCTUpdate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Partial update of a LandCoverType (e.g., change name, type, parent)
+        ADMIN ONLY: Partial update of a LandCoverType (e.g., change name, type, description)
     """
     repository = LCTRepository(db)
     updated = await repository.update(lct_id, LandCoverType_update)

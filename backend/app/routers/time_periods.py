@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime
 from ..schemas import TPCreate, TPUpdate, TPResponse
 from ..database import get_db
 from ..repositories import TPRepository
@@ -51,7 +52,7 @@ async def get_tp(tp_name: str, db: AsyncSession = Depends(get_db)):
 async def create_tp(tp_data: TPCreate, db: AsyncSession = Depends(get_db)):
     """
     Create a new Time Period:
-        - start and end date must be valid datetime before time.now() (TODO: implement date checking)
+        - start and end date must be valid datetime before time.now()
     """
     repo = TPRepository(db)
 
@@ -61,6 +62,20 @@ async def create_tp(tp_data: TPCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Time Period already exists"
+        )
+    
+    # Check that start_date is before end_date
+    if tp_data.start_date >= tp_data.end_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_date must be before end_date"
+        )
+    
+    # Check that end_date is not in the future
+    if tp_data.end_date > datetime.now():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="end_date cannot be in the future"
         )
 
     new_tp = await repo.create(tp_data)

@@ -25,7 +25,6 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
-# TODO: add all the routers
 app.include_router(users.router)
 app.include_router(regions.router)
 app.include_router(subscriptions.router)
@@ -94,14 +93,6 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 @app.get("/api/hello", tags = ["General"])
 async def hello_world():
     return {"message": "backend is running!!"}
-
-
-"""
-    TODO: Add additional API routes so we can send information from the backend to the fronend and vice 
-    versa  -- in the routers folder
-    
-    Gavin can work on this part
-"""
 
 # How to run (from project root: python -m backend.app.main)
 if __name__ == "__main__":

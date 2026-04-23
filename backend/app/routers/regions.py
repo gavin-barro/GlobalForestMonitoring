@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.dependencies.auth import get_admin_user
+
 from ..schemas import RegionCreate, RegionUpdate, RegionResponse
 from ..database import get_db
 from ..repositories import RegionRepository
@@ -54,9 +56,9 @@ async def search_regions(query: str, db: AsyncSession = Depends(get_db)):
     return regions
 
 @router.post("/", response_model=RegionResponse, status_code=status.HTTP_201_CREATED)
-async def create_region(region_data: RegionCreate, db: AsyncSession = Depends(get_db)):
+async def create_region(region_data: RegionCreate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Create a new region — supports hierarchy via parent_region_id -- TODO: admin only later
+        Create a new region — supports hierarchy via parent_region_id
     """
     repository = RegionRepository(db)
 

@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from typing import List
+
+from backend.app.dependencies.auth import get_admin_user
 from ..schemas import FOCreate, FOUpdate, FOResponse
 from ..database import get_db
 from ..repositories import FORepository, MetricRepository, RegionRepository, TPRepository
@@ -76,7 +78,7 @@ async def create_fo(fo_data: FOCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/{fo_id}", response_model=FOResponse)
-async def update_fo(fo_id: int, fo_update: FOUpdate,db: AsyncSession = Depends(get_db)):
+async def update_fo(fo_id: int, fo_update: FOUpdate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
         Partially update ForestObservation information
         Only fields provided in request body are changed
@@ -108,7 +110,7 @@ async def update_fo(fo_id: int, fo_update: FOUpdate,db: AsyncSession = Depends(g
 
 
 @router.delete("/{fo_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_metric(fo_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_fo(fo_id: int, db: AsyncSession = Depends(get_db)):
     """
         Delete a forest observation by ID
         Returns 204 No Content on success

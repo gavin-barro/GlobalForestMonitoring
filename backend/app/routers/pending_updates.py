@@ -5,7 +5,7 @@ from typing import List
 from ..schemas import PUCreate, PUUpdate, PUResponse
 from ..database import get_db
 from ..repositories import PURepository, UserRepository
-from ..dependencies.auth import get_admin_user
+from ..dependencies.auth import get_admin_user, get_current_user
 
 router = APIRouter(
     prefix="/pending_updates",
@@ -88,14 +88,22 @@ async def update_pending_update(pu_id: int, pu_update: PUUpdate, db: AsyncSessio
     if pu_update.pending is not None and pu_update.pending == False:
         raise HTTPException(status_code=400, detail="Cannot set pending to False via this endpoint. Use /approve/{pu_id} instead.")
 
-    # If updating submitting_user_id, check if the new user exists
-    if pu_update.submitting_user_id is not None:
+    current_user = await get_current_user(db)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Authentication required to update pending updates")
+    if current_user.get("user_id") != pu_update.submitting_user_id and current_user.get("acct_type") != "admin":
+        raise HTTPException(status_code=403, detail="Only the submitting user or an admin can update this pending update")
+    if current_user.get("acct_type") != "admin":
+        raise HTTPException(status_code=403, detail="Admin privileges required to update pending updates")
+
+    # If updating submitting_user_id as admin, check if the new user exists
+    if current_user.get("acct_type") == "admin" and pu_update.submitting_user_id is not None:
         user = await user_repo.get_by_id(pu_update.submitting_user_id)
         if not user:
             raise HTTPException(status_code=400, detail="Submitting user does not exist")
         
-    # If updating admin_user_id, check if the new user exists
-    if pu_update.admin_user_id is not None:
+    # If updating admin_user_id as admin, check if the new user exists
+    if current_user.get("acct_type") == "admin" and pu_update.admin_user_id is not None:
         admin = await user_repo.get_by_id(pu_update.admin_user_id)
         if not admin:
             raise HTTPException(status_code=400, detail="Admin user does not exist")

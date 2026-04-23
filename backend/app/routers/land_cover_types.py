@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.dependencies.auth import get_admin_user
+
 from ..schemas import LCTCreate, LCTUpdate, LCTResponse
 from ..database import get_db
 from ..repositories import LCTRepository
@@ -44,9 +46,9 @@ async def get_LandCoverType_by_name(lct_name: str, db: AsyncSession = Depends(ge
     return lct
 
 @router.post("/", response_model=LCTResponse, status_code=status.HTTP_201_CREATED)
-async def create_LandCoverType(lct_data: LCTCreate, db: AsyncSession = Depends(get_db)):
+async def create_LandCoverType(lct_data: LCTCreate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Create a new LandCoverType — supports hierarchy via parent_LandCoverType_id -- TODO: admin only later
+        Create a new LandCoverType — supports hierarchy via parent_LandCoverType_id
     """
     repository = LCTRepository(db)
 

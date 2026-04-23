@@ -75,6 +75,13 @@ async def update_region(region_id: int, region_update: RegionUpdate, db: AsyncSe
         Partial update of a region (e.g., change name, type, parent)
     """
     repository = RegionRepository(db)
+
+    # If updating parent_region_id, check if the new parent exists
+    if region_update.parent_region_id is not None:
+        parent = await repository.get_by_id(region_update.parent_region_id)
+        if not parent:
+            raise HTTPException(status_code=400, detail="Parent region does not exist")
+
     updated = await repository.update(region_id, region_update)
     if updated is None:
         raise HTTPException(status_code=404, detail="Region not found")

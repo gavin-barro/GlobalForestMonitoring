@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from typing import List
 from ..schemas import FOCreate, FOUpdate, FOResponse
 from ..database import get_db
-from ..repositories import FORepository
+from ..repositories import FORepository, MetricRepository, RegionRepository, TPRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(
@@ -52,7 +52,20 @@ async def get_fos_by_region(region_id: int, db: AsyncSession = Depends(get_db)):
 @router.post("/", response_model=FOResponse, status_code=status.HTTP_201_CREATED)
 async def create_fo(fo_data: FOCreate, db: AsyncSession = Depends(get_db)):
     repository = FORepository(db)
+    tp_repo = TPRepository(db)
+    metric_repo = MetricRepository(db)
+    region_repo = RegionRepository(db)
+
     try:
+        if await tp_repo.get_by_id(fo_data.period_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid period_id")
+        
+        if await metric_repo.get_by_id(fo_data.metric_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid metric_id")
+        
+        if await region_repo.get_by_id(fo_data.region_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid region_id")
+
         new_forest_observation = await repository.create(fo_data)
         return new_forest_observation
     except IntegrityError:
@@ -69,6 +82,23 @@ async def update_fo(fo_id: int, fo_update: FOUpdate,db: AsyncSession = Depends(g
         Only fields provided in request body are changed
     """
     repo = FORepository(db)
+    tp_repo = TPRepository(db)
+    metric_repo = MetricRepository(db)
+    region_repo = RegionRepository(db)
+
+    # Validate foreign keys if they are being updated
+    if fo_update.period_id is not None:
+        if await tp_repo.get_by_id(fo_update.period_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid period_id")    
+        
+    if fo_update.metric_id is not None:
+        if await metric_repo.get_by_id(fo_update.metric_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid metric_id")
+        
+    if fo_update.region_id is not None:
+        if await region_repo.get_by_id(fo_update.region_id) is None:
+            raise HTTPException(status_code=400, detail="Invalid region_id")
+
     updated_fo = await repo.update(fo_id, fo_update)
 
     if updated_fo is None:

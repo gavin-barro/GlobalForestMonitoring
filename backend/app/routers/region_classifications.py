@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from ..schemas import RCCreate, RCResponse
 from ..database import get_db
-from ..repositories import RCRepository
+from ..repositories import LCTRepository, RCRepository, RegionRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(
@@ -60,6 +60,17 @@ async def create_region_classification(rc_data: RCCreate, db: AsyncSession = Dep
         Create a new region classification
     """
     repo = RCRepository(db)
+    region_repo = RegionRepository(db)
+    lct_repo = LCTRepository(db)
+
+    # Validate foreign keys
+    region = await region_repo.get_by_id(rc_data.rc_region_id)
+    if not region:
+        raise HTTPException(status_code=400, detail="Region does not exist")
+    
+    lct = await lct_repo.get_by_id(rc_data.lct_id)
+    if not lct:
+        raise HTTPException(status_code=400, detail="LCT does not exist")
 
     new_region_classification = await repo.create(rc_data)
     return new_region_classification

@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schemas import SubscriptionCreate, SubscriptionUpdate, SubscriptionResponse
 from ..database import get_db
-from ..repositories import SubscriptionRepository
+from ..repositories import RegionRepository, SubscriptionRepository, UserRepository, MetricRepository
 
 router = APIRouter(
     prefix="/subscriptions",
@@ -44,6 +44,23 @@ async def get_subscription(user_id: int, metric_id: int, region_id: int, db: Asy
 async def create_subscription(sub_data: SubscriptionCreate, db: AsyncSession = Depends(get_db)):
     """Subscribe a user to a metric in a region (with optional threshold)"""
     repository = SubscriptionRepository(db)
+    user_repository = UserRepository(db)
+    metric_repository = MetricRepository(db)
+    region_repository = RegionRepository(db)
+
+    # Validate foreign keys    
+    user = await user_repository.get_by_id(sub_data.user_id)
+    if not user:
+        raise HTTPException(status_code=400, detail="User does not exist")
+    
+    metric = await metric_repository.get_by_id(sub_data.metric_id)
+    if not metric:
+        raise HTTPException(status_code=400, detail="Metric does not exist")
+    
+    region = await region_repository.get_by_id(sub_data.region_id)
+    if not region:  
+        raise HTTPException(status_code=400, detail="Region does not exist")
+
     # Optional: check if already subscribed
     existing = await repository.get_by_ids(sub_data.user_id, sub_data.metric_id, sub_data.region_id)
     if existing:
@@ -58,6 +75,33 @@ async def update_subscription(user_id: int, metric_id: int, region_id: int, sub_
         Partial update (e.g., toggle active, change threshold for alerts)
     """
     repository = SubscriptionRepository(db)
+    user_repository = UserRepository(db)
+    metric_repository = MetricRepository(db)
+    region_repository = RegionRepository(db)
+
+
+    if sub_update.active is not None:
+
+        # Check if subscription already exists
+        
+        existing = await repository.get_by_ids(user_id, metric_id, region_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="Subscription not found")
+        
+        # Validate foreign keys if they are being updated
+
+        user = await user_repository.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=400, detail="User does not exist")
+        
+        metric = await metric_repository.get_by_id(metric_id)
+        if not metric:
+            raise HTTPException(status_code=400, detail="Metric does not exist")
+
+        region = await region_repository.get_by_id(region_id)
+        if not region:  
+            raise HTTPException(status_code=400, detail="Region does not exist")
+
     updated = await repository.update(user_id, metric_id, region_id, sub_update)
     if updated is None:
         raise HTTPException(status_code=404, detail="Subscription not found")

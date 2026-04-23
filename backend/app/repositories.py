@@ -604,6 +604,26 @@ class PURepository(BaseRepository):
             await self.commit()
             await self.refresh(pu)
         return pu
+    
+    async def approve(self, update_id: int) -> Optional[PendingUpdates]:
+        pu = await self.get_by_id(update_id)
+        if not pu:
+            return None
+        
+        # Here we would also apply the proposed change to the parent observation if applicable
+        # For simplicity, we'll just update the status to 'Approved' and not implement the actual application logic
+        sql_statement = select(PendingUpdates).from_statement(text("""
+                             UPDATE pending_updates
+                             SET status = 'Approved'
+                             WHERE update_id = :update_id
+                             RETURNING *"""))
+        result = await self.db.execute(sql_statement, {"update_id": update_id})
+        approved_pu = result.scalar_one_or_none()
+        
+        await self.commit()
+        if approved_pu:
+            await self.refresh(approved_pu)
+        return approved_pu
 
     async def delete(self, update_id: int) -> bool:
         pu = await self.get_by_id(update_id)

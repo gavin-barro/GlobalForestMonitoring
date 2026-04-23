@@ -4,7 +4,8 @@ from typing import List
 
 from ..schemas import PUCreate, PUUpdate, PUResponse
 from ..database import get_db
-from ..repositories import PURepository
+from ..repositories import PURepository, UserRepository
+from ..dependencies.auth import get_admin_user
 
 router = APIRouter(
     prefix="/pending_updates",
@@ -61,6 +62,17 @@ async def create_pending_update(pu_data: PUCreate, db: AsyncSession = Depends(ge
         Create a new PendingUpdate
     """
     repository = PURepository(db)
+    user_repository = UserRepository(db)
+
+    # Validate user ids
+    user = await user_repository.get_by_id(pu_data.submitting_user_id)
+    if not user:
+        raise HTTPException(status_code=400, detail="Submitting user does not exist")
+    
+    if pu_data.admin_user_id is not None:
+        admin = await user_repository.get_by_id(pu_data.admin_user_id)
+        if not admin:
+            raise HTTPException(status_code=400, detail="Admin user does not exist")
 
     new_pu = await repository.create(pu_data)
     return new_pu
@@ -71,10 +83,42 @@ async def update_pending_update(pu_id: int, pu_update: PUUpdate, db: AsyncSessio
         Partial update of a PendingUpdate (e.g., change name, type, parent)
     """
     repository = PURepository(db)
+    user_repo = UserRepository(db)
+
+    if pu_update.pending is not None and pu_update.pending == False:
+        raise HTTPException(status_code=400, detail="Cannot set pending to False via this endpoint. Use /approve/{pu_id} instead.")
+
+    # If updating submitting_user_id, check if the new user exists
+    if pu_update.submitting_user_id is not None:
+        user = await user_repo.get_by_id(pu_update.submitting_user_id)
+        if not user:
+            raise HTTPException(status_code=400, detail="Submitting user does not exist")
+        
+    # If updating admin_user_id, check if the new user exists
+    if pu_update.admin_user_id is not None:
+        admin = await user_repo.get_by_id(pu_update.admin_user_id)
+        if not admin:
+            raise HTTPException(status_code=400, detail="Admin user does not exist")
+
     updated = await repository.update(pu_id, pu_update)
     if updated is None:
         raise HTTPException(status_code=404, detail="PendingUpdate not found")
     return updated
+
+@router.patch("/approve/{pu_id}", response_model=PUResponse)
+async def approve_pending_update(pu_id: int, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
+    """
+        Approve a PendingUpdate (set pending=False, apply changes to parent if applicable)
+    """
+    repository = PURepository(db)
+
+    if not admin or admin.get("acct_type") != "admin":
+        raise HTTPException(status_code=403, detail="Admin privileges required to approve pending updates")
+
+    approved = await repository.approve(pu_id)
+    if approved is None:
+        raise HTTPException(status_code=404, detail="PendingUpdate not found")
+    return approved
 
 @router.delete("/{pu_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_pending_update(pu_id: int, db: AsyncSession = Depends(get_db)):

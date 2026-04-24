@@ -3,8 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.dependencies.auth import get_admin_user
-
+from ..dependencies.auth import get_admin_user
 from ..schemas import RegionCreate, RegionUpdate, RegionResponse
 from ..database import get_db
 from ..repositories import RegionRepository

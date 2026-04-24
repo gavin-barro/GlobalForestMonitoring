@@ -11,7 +11,7 @@ const initialValues: Region = {
     region_name: "",
     region_type: "Country",
     geo_boundary: "",
-    parent_region_id: 1
+    parent_region_id: null
 }
 
 export default function StaticAddRegionPage() {
@@ -45,10 +45,12 @@ export default function StaticAddRegionPage() {
         }
     }
 
-    const regions = parentRegions.map(region => ({
+    const regions = [
+        {value: null, label: "None"},
+        ...parentRegions.map(region => ({
         value: region.region_id,
         label: region.region_name
-    }));
+    }))];
 
     return (
         <div className="page">

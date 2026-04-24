@@ -42,7 +42,7 @@ export interface Region {
     region_name: string;
     region_type: string;
     geo_boundary: string;
-    parent_region_id: number;
+    parent_region_id: number | null;
 }
 
 // METRIC

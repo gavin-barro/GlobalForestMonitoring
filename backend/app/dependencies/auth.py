@@ -37,7 +37,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
 async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict:
-    if current_user["acct_type"] != "Admin":
+    if current_user["acct_type"] != "Administrator":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"

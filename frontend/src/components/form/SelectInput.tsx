@@ -4,7 +4,7 @@ import { Field, ErrorMessage } from 'formik';
 interface SelectInputProps {
     label: string;
     name: string;
-    options: { value: number; label: string }[];
+    options: { value: number | null; label: string }[];
 }
 
 export const SelectInput: React.FC<SelectInputProps> = ({ label, name, options }) => {
@@ -20,8 +20,8 @@ export const SelectInput: React.FC<SelectInputProps> = ({ label, name, options }
         <>
             {displayLabel(name)}
             <Field as="select" name={name}>
-                {options.map(option => (
-                    <option key={option.value} value={option.value}>
+                {options.map((option, index) => (
+                    <option key={option.value ?? `null-${index}`} value={option.value ?? ""}>
                         {option.label}
                     </option>
                 ))}

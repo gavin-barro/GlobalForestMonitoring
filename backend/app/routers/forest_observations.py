@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from typing import List
 
-from backend.app.dependencies.auth import get_admin_user
+from ..dependencies.auth import get_admin_user
 from ..schemas import FOCreate, FOUpdate, FOResponse
 from ..database import get_db
 from ..repositories import FORepository, MetricRepository, RegionRepository, TPRepository

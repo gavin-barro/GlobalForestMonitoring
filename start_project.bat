@@ -27,7 +27,7 @@ IF NOT EXIST "%BACKEND%\.venv\Scripts\python.exe" (
 )
 
 echo Starting FastAPI backend https://localhost:8000 
-start "FastAPI Backend" cmd /k "cd /d %BACKEND% && .venv\Scripts\python.exe -m uvicorn main:app --reload"
+start "FastAPI Backend" cmd /k "cd /d %BACKEND% && .venv\Scripts\python.exe -m uvicorn app.main:app --reload"
 
 echo Checking Node dependencies...
 IF NOT EXIST "%FRONTEND%\node_modules" (

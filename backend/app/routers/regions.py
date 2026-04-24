@@ -58,7 +58,7 @@ async def search_regions(query: str, db: AsyncSession = Depends(get_db)):
 @router.post("/", response_model=RegionResponse, status_code=status.HTTP_201_CREATED)
 async def create_region(region_data: RegionCreate, db: AsyncSession = Depends(get_db), admin: dict = Depends(get_admin_user)):
     """
-        Create a new region — supports hierarchy via parent_region_id
+        ADMIN ONLY: Create a new region — supports hierarchy via parent_region_id
     """
     repository = RegionRepository(db)
 

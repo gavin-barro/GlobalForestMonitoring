@@ -69,11 +69,6 @@ async def create_pending_update(pu_data: PUCreate, db: AsyncSession = Depends(ge
     if not user:
         raise HTTPException(status_code=400, detail="Submitting user does not exist")
     
-    if pu_data.admin_user_id is not None:
-        admin = await user_repository.get_by_id(pu_data.admin_user_id)
-        if not admin:
-            raise HTTPException(status_code=400, detail="Admin user does not exist")
-
     new_pu = await repository.create(pu_data)
     return new_pu
 

@@ -42,9 +42,12 @@ export default function SearchMap() {
   // Default roughly over global or south america 
   const [mapCenter, setMapCenter] = useState<[number, number]>([-10, -55]);
   const [allPins, setAllPins] = useState<Region[]>([]);
+  const [subscribedRegionIds, setSubscribedRegionIds] = useState<Set<number>>(new Set());
 
   const acctType = localStorage.getItem('acct_type');
-  const dashboardLink = acctType === 'Guest' ? '/dashboard/guest' : '/dashboard/viewer';
+  let dashboardLink = '/dashboard/viewer';
+  if (acctType === 'Guest') dashboardLink = '/dashboard/guest';
+  if (acctType === 'Researcher') dashboardLink = '/dashboard/researcher';
 
   // Fetch either specific query or all regions on load
   useEffect(() => {
@@ -67,6 +70,22 @@ export default function SearchMap() {
             handleSelect(data[0]);
           }
         }
+
+        // Fetch subscriptions if logged in
+        const userIdStr = localStorage.getItem('user_id');
+        let finalUserIdStr = userIdStr;
+        if (!finalUserIdStr && acctType?.toLowerCase() === 'researcher') {
+            finalUserIdStr = '0';
+        }
+        if (finalUserIdStr) {
+          const subRes = await fetch(`http://localhost:8000/subscriptions/by-user/${finalUserIdStr}`);
+          if (subRes.ok) {
+             const subData = await subRes.json();
+             const ids = new Set(subData.map((s: any) => s.region_id));
+             setSubscribedRegionIds(ids as Set<number>);
+          }
+        }
+
       } catch (e) {
         console.error(e);
       }
@@ -127,14 +146,39 @@ export default function SearchMap() {
   };
 
   const handleSubscribe = async (regionId: number) => {
-    const userIdStr = localStorage.getItem('user_id');
+    let userIdStr = localStorage.getItem('user_id');
+    if (!userIdStr && acctType?.toLowerCase() === 'researcher') userIdStr = '0';
+    
     if (!userIdStr) {
       alert("Must be logged in properly to subscribe!");
       return;
     }
     const token = localStorage.getItem('token');
+    
+    const isSubscribed = subscribedRegionIds.has(regionId);
+    if (isSubscribed) {
+       try {
+         const res = await fetch(`http://localhost:8000/subscriptions/${userIdStr}/1/${regionId}`, {
+           method: 'DELETE',
+           headers: { 'Authorization': `Bearer ${token}` }
+         });
+         if (res.ok || res.status === 204) {
+             setSubscribedRegionIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(regionId);
+                return newSet;
+             });
+         } else {
+             alert("Failed to unsubscribe");
+         }
+       } catch (err) {
+           console.error(err);
+       }
+       return;
+    }
+
     const payload = {
-      user_id: parseInt(userIdStr),
+      user_id: parseInt(userIdStr, 10),
       metric_id: 1, 
       region_id: regionId,
       active: true
@@ -151,11 +195,11 @@ export default function SearchMap() {
       });
       
       if (res.ok) {
-        alert("Subscribed successfully!");
+        setSubscribedRegionIds(prev => new Set(prev).add(regionId));
       } else {
         const body = await res.json();
         if (body.detail === "User already subscribed to this metric in region") {
-           alert("You are already subscribed to this region.");
+           setSubscribedRegionIds(prev => new Set(prev).add(regionId));
         } else {
            alert("Subscription failed");
         }
@@ -205,14 +249,33 @@ export default function SearchMap() {
               >
                 <div style={{ fontWeight: "800", color: "#1b4332", fontSize: "1.1rem" }}>{r.region_name}</div>
                 <div style={{ fontSize: "0.85rem", color: "#5C6E61", marginBottom: "12px", marginTop: "4px" }}>Type: {r.region_type}</div>
-                {localStorage.getItem('user_id') && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleSubscribe(r.region_id); }}
-                    style={{ background: "#1b4332", color: "white", border: "none", padding: "8px 14px", borderRadius: "6px", fontSize: "0.85rem", cursor: "pointer", fontWeight: "600", width: "100%" }}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {acctType && acctType !== 'Guest' && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleSubscribe(r.region_id); }}
+                      style={{ 
+                        flex: 1, 
+                        background: subscribedRegionIds.has(r.region_id) ? "rgba(220, 53, 69, 0.1)" : "#1b4332", 
+                        color: subscribedRegionIds.has(r.region_id) ? "#dc3545" : "white", 
+                        border: subscribedRegionIds.has(r.region_id) ? "1px solid #dc3545" : "none", 
+                        padding: "8px 14px", 
+                        borderRadius: "6px", 
+                        fontSize: "0.85rem", 
+                        cursor: "pointer", 
+                        fontWeight: "600" 
+                      }}
+                    >
+                      {subscribedRegionIds.has(r.region_id) ? "Unsave Region" : "Save Region"}
+                    </button>
+                  )}
+                  <Link 
+                    to={`/dashboard/viewer/historical?region_id=${r.region_id}&region_name=${encodeURIComponent(r.region_name)}`}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ flex: 1, textAlign: 'center', background: "#E6E1D6", color: "#1b4332", border: "1px solid #1b4332", padding: "8px 14px", borderRadius: "6px", fontSize: "0.85rem", cursor: "pointer", fontWeight: "600", textDecoration: "none" }}
                   >
-                    Save Region
-                  </button>
-                )}
+                    View Trends
+                  </Link>
+                </div>
               </div>
             ))}
             {results.length === 0 && <p style={{ color: "#888", textAlign: "center", marginTop: "2rem" }}>No results found.</p>}

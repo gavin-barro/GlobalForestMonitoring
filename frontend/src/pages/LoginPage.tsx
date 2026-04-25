@@ -69,7 +69,7 @@ export default function Login() {
       let path = "guest";
       if (role === "Administrator" || role === "Admin") path = "admin";
       else if (role === "Researcher") path = "researcher";
-      else if (role === "Viewer") path = "viewer";
+      else if (role === "Viewer" || role === "Subscriber") path = "viewer";
 
       navigate(`/dashboard/${path}`);
     } catch (error) {

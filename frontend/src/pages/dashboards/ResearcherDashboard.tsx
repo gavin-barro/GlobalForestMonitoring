@@ -11,49 +11,52 @@ export default function ResearcherDashboard() {
   };
 
   return (
-    <div className="page home-page">
-      <div className="logout-container" style={{ position: "absolute", top: "2rem", right: "2rem" }}>
+    <div className="page home-page" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "absolute", top: "2rem", right: "2rem" }}>
         <button onClick={handleLogout} style={{ background: "rgba(220, 53, 69, 0.1)", color: "#dc3545", border: "1px solid #dc3545", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Logout</button>
       </div>
-      <div className="home-container">
+      
+      <div className="home-container" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div className="home-header">
-          <h2 className="welcome-banner">Welcome Researcher, {username}!</h2>
+          <h2 className="welcome-banner">Welcome, {username}!</h2>
           <h1 className="home-title">Researcher Workbench</h1>
-          <p className="home-subtitle">Data Analysis & Forest Insight</p>
+          <p className="home-subtitle">Analyze trends and propose localized forest updates.</p>
         </div>
 
-        <div className="dashboard-grid">
-          <Link to="/analytics" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#e8f5e9" }}>📊</div>
+        <div className="dashboard-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+        
+          <Link to="/dashboard/viewer/search" className="dashboard-card" style={{ height: "130px" }}>
+            <div className="card-icon" style={{ background: "#e8f5e9" }}>🌍</div>
+            <div className="card-content">
+              <h3>Explore Data & Map</h3>
+              <p>Browse global forest layers and boundaries</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard/viewer/historical" className="dashboard-card" style={{ height: "130px" }}>
+            <div className="card-icon" style={{ background: "#f3e5f5" }}>📈</div>
             <div className="card-content">
               <h3>Statistical Trends</h3>
-              <p>Deep-dive monitoring of forest coverage changes</p>
+              <p>Deep-dive analysis of coverage changes</p>
             </div>
           </Link>
 
-          <Link to="/static/add/forest_observation" className="dashboard-card">
+          <Link to="/dashboard/researcher/suggest-update" className="dashboard-card" style={{ height: "130px" }}>
             <div className="card-icon" style={{ background: "#e3f2fd" }}>📝</div>
             <div className="card-content">
-              <h3>Suggest Updates</h3>
-              <p>Draft pending data updates for admin review</p>
+              <h3>Suggest Update</h3>
+              <p>Draft new forest observations for admin review</p>
             </div>
           </Link>
 
-          <Link to="/sensitive-data" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#fff3e0" }}>🔒</div>
+          <Link to="/dashboard/researcher/my-updates" className="dashboard-card" style={{ height: "130px" }}>
+            <div className="card-icon" style={{ background: "#fff3e0" }}>📋</div>
             <div className="card-content">
-              <h3>Sensitive Data</h3>
-              <p>Access hidden/sensitive categories</p>
+              <h3>My Proposals</h3>
+              <p>Track the status of your submitted updates</p>
             </div>
           </Link>
 
-          <Link to="/static/get/subscription" className="dashboard-card">
-            <div className="card-icon" style={{ background: "#f3e5f5" }}>🔔</div>
-            <div className="card-content">
-              <h3>Subscriptions & Search</h3>
-              <p>Standard viewer tools and region mapping</p>
-            </div>
-          </Link>
         </div>
       </div>
     </div>

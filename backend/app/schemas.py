@@ -10,7 +10,6 @@ class UserBase(BaseModel):
     acct_type: Literal['Admin', 'Researcher', 'Subscriber', 'Guest']
 
 class UserCreate(UserBase):
-    user_id: int
     pw_hash: str
     creation_date: date
 

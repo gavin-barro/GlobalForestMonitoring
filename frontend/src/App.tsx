@@ -21,7 +21,8 @@ import SearchMap from "./pages/Viewer/SearchMap";
 import SavedRegions from "./pages/Viewer/SavedRegions";
 import HistoricalTrends from "./pages/Viewer/HistoricalTrends";
 import PublicRegions from "./pages/PublicRegions";
-
+import SuggestUpdate from "./pages/Researcher/SuggestUpdate";
+import MyProposals from "./pages/Researcher/MyProposals";
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
         <Route path="/dashboard/viewer/saved" element={<SavedRegions />} />
         <Route path="/dashboard/viewer/historical" element={<HistoricalTrends />} />
         <Route path="/dashboard/researcher" element={<ResearcherDashboard />} />
+        <Route path="/dashboard/researcher/suggest-update" element={<SuggestUpdate />} />
+        <Route path="/dashboard/researcher/my-updates" element={<MyProposals />} />
         <Route path="/dashboard/admin" element={<AdminDashboard />} />
         <Route path="/static/add/region" element={<StaticAddRegion />} />
         <Route path="/static/add/user" element={<StaticAddUser />} />

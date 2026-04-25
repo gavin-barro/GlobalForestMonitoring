@@ -65,8 +65,7 @@ async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_db))
         email=user_data.email,
         acct_type=user_data.acct_type,
         pw_hash=hashed_pw,                    
-        creation_date=user_data.creation_date,
-        user_id=user_data.user_id        
+        creation_date=user_data.creation_date
     )
 
     new_user = await repo.create(user_to_create)

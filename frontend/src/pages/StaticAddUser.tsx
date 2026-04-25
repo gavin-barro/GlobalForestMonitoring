@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { generateRandomId } from "../utils";
 
 const initialValues: UserFormBackend = {
-    user_id: 0,
     username: "",
     email: "",
     acct_type: "Guest",
@@ -19,7 +18,6 @@ export default function StaticAddUserPage() {
     const navigate = useNavigate();
     const handleSubmit = async (values: UserFormBackend) => {
         const today = format(new Date(), "yyyy-MM-dd");
-        const user_id = generateRandomId(100);
 
         console.log("Received user as the following from frontend: " + JSON.stringify(values, null, 2));
 
@@ -27,7 +25,6 @@ export default function StaticAddUserPage() {
             username: values.username,
             email: values.email,
             acct_type: "Guest",
-            user_id: user_id,
             pw_hash: values.pw_hash,
             creation_date: today
         }

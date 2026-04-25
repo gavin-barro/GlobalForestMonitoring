@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, useMap, GeoJSON } from 'react-leaflet';
+import { Link, useLocation } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import '../dashboards/dashboard.css';
 
@@ -19,7 +19,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const MapEffect = ({ center }: { center: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, map.getZoom());
+    map.flyTo(center, 4, { animate: true, duration: 1.5 });
   }, [center, map]);
   return null;
 }
@@ -32,38 +32,96 @@ interface Region {
 }
 
 export default function SearchMap() {
-  const [query, setQuery] = useState('');
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialQuery = searchParams.get('query') || '';
+
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<Region[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
   // Default roughly over global or south america 
   const [mapCenter, setMapCenter] = useState<[number, number]>([-10, -55]);
+  const [allPins, setAllPins] = useState<Region[]>([]);
 
   const acctType = localStorage.getItem('acct_type');
   const dashboardLink = acctType === 'Guest' ? '/dashboard/guest' : '/dashboard/viewer';
 
+  // Fetch either specific query or all regions on load
+  useEffect(() => {
+    const fetchInitial = async () => {
+      try {
+        let url = `http://localhost:8000/regions/`;
+        if (initialQuery) {
+          url = `http://localhost:8000/regions/search/${encodeURIComponent(initialQuery)}`;
+        }
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(data);
+          
+          // Also set map pins to show all returned results
+          setAllPins(data.filter((r: Region) => r.geo_boundary !== null));
+
+          // If there's an initial query and a match, auto-select the first one
+          if (initialQuery && data.length > 0) {
+            handleSelect(data[0]);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchInitial();
+  }, [initialQuery]);
+
   const searchRegions = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query) { setResults([]); return; }
     try {
-      const res = await fetch(`http://localhost:8000/regions/search/${encodeURIComponent(query)}`);
+      let url = `http://localhost:8000/regions/`;
+      if (query) {
+         url = `http://localhost:8000/regions/search/${encodeURIComponent(query)}`;
+      }
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setResults(data);
+        setAllPins(data.filter((r: Region) => r.geo_boundary !== null));
       } else {
         setResults([]);
+        setAllPins([]);
       }
     } catch (e) {
       console.error(e);
       setResults([]);
+      setAllPins([]);
     }
   };
 
   const handleSelect = (r: Region) => {
     setSelectedRegion(r);
-    if (r.geo_boundary) {
+    if (!r.geo_boundary) return;
+
+    if (r.geo_boundary.trim().startsWith('{')) {
+      try {
+        const match = r.geo_boundary.match(/\[\s*([-\d\.]+)\s*,\s*([-\d\.]+)\s*\]/);
+        if (match) {
+          const lng = parseFloat(match[1]);
+          const lat = parseFloat(match[2]);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            setMapCenter([lat, lng]);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
       const parts = r.geo_boundary.split(',');
-      if (parts.length === 2 && !isNaN(parseFloat(parts[0])) && !isNaN(parseFloat(parts[1]))) {
-        setMapCenter([parseFloat(parts[0]), parseFloat(parts[1])]);
+      if (parts.length === 2) {
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setMapCenter([lat, lng]);
+        }
       }
     }
   };
@@ -169,11 +227,44 @@ export default function SearchMap() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <MapEffect center={mapCenter} />
-            {selectedRegion && (
-              <Marker position={mapCenter}>
-                <Popup>{selectedRegion.region_name}</Popup>
-              </Marker>
-            )}
+            {allPins.map(r => {
+              if (!r.geo_boundary) return null;
+
+              if (r.geo_boundary.trim().startsWith('{')) {
+                try {
+                  const data = JSON.parse(r.geo_boundary);
+                  return (
+                    <GeoJSON 
+                      key={r.region_id + (selectedRegion?.region_id === r.region_id ? '-active' : '')}
+                      data={data} 
+                      eventHandlers={{ click: () => handleSelect(r) }}
+                      pathOptions={{
+                        color: selectedRegion?.region_id === r.region_id ? '#1b4332' : '#2D6A4F',
+                        weight: selectedRegion?.region_id === r.region_id ? 3 : 1,
+                        fillOpacity: selectedRegion?.region_id === r.region_id ? 0.3 : 0.05
+                      }}
+                    >
+                      <Popup>{r.region_name}</Popup>
+                    </GeoJSON>
+                  );
+                } catch(e) {
+                  return null;
+                }
+              }
+
+              const parts = r.geo_boundary.split(',');
+              if (parts.length !== 2) return null;
+              const lat = parseFloat(parts[0]);
+              const lng = parseFloat(parts[1]);
+              if (isNaN(lat) || isNaN(lng)) return null;
+              return (
+                <Marker key={r.region_id} position={[lat, lng]} eventHandlers={{ click: () => handleSelect(r) }}>
+                  {selectedRegion?.region_id === r.region_id && (
+                    <Popup>{r.region_name}</Popup>
+                  )}
+                </Marker>
+              );
+            })}
           </MapContainer>
         </div>
 

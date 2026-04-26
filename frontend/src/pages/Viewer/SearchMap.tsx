@@ -128,7 +128,15 @@ export default function SearchMap() {
 
     if (r.geo_boundary.trim().startsWith('{')) {
       try {
-        const geoObj = JSON.parse(r.geo_boundary);
+        let geoObj = JSON.parse(r.geo_boundary);
+        
+        // AUTO-FIX: If the user pasted a Feature or a "geometry": {} wrapper, extract the inner geometry
+        if (geoObj.geometry) {
+          geoObj = geoObj.geometry;
+        } else if (geoObj.type === "Feature" && geoObj.geometry) {
+          geoObj = geoObj.geometry;
+        }
+
         // Create a temporary layer to calculate bounds
         const layer = L.geoJSON(geoObj);
         const bounds = layer.getBounds();
@@ -140,6 +148,7 @@ export default function SearchMap() {
         console.error("GeoJSON parse error in handleSelect:", e);
       }
     } else {
+
       const parts = r.geo_boundary.split(',');
       if (parts.length === 2) {
         const lat = parseFloat(parts[0]);
@@ -301,7 +310,10 @@ export default function SearchMap() {
 
               if (r.geo_boundary.trim().startsWith('{')) {
                 try {
-                  const data = JSON.parse(r.geo_boundary);
+                  let data = JSON.parse(r.geo_boundary);
+                  if (data.geometry) data = data.geometry;
+                  else if (data.type === "Feature" && data.geometry) data = data.geometry;
+
                   return (
                     <GeoJSON 
                       key={r.region_id + (selectedRegion?.region_id === r.region_id ? '-active' : '')}

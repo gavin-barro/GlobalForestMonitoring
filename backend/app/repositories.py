@@ -135,10 +135,11 @@ class RegionRepository(BaseRepository):
     async def create(self, region_data: RegionCreate) -> Regions:
         data = region_data.model_dump()
         sql_statement = select(Regions).from_statement(
-            text("INSERT INTO regions (region_name, region_type, parent_region) \
-                    VALUES (:region_name, :region_type, :parent_region_id) \
+            text("INSERT INTO regions (region_name, region_type, parent_region, geo_boundary) \
+                    VALUES (:region_name, :region_type, :parent_region_id, :geo_boundary) \
                     RETURNING *")
         )
+
         result = await self.db.execute(sql_statement, data)
         region = result.scalar_one()
         

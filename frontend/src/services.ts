@@ -69,7 +69,9 @@ export const requestCreateSubscription = async(subscription: Subscription): Prom
 /* Delete a user */
 async function requestDelete(endpoint: string, id: number): Promise<Boolean> {
     try {
-        await axios.delete(`${apiUrl}/${endpoint}/${id}`);
+        const token = localStorage.getItem('token');
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+        await axios.delete(`${apiUrl}/${endpoint}/${id}`, config);
         return true;
     } catch (error) {
         return false;

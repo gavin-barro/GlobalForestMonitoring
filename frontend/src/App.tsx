@@ -23,11 +23,17 @@ import HistoricalTrends from "./pages/Viewer/HistoricalTrends";
 import PublicRegions from "./pages/PublicRegions";
 import SuggestUpdate from "./pages/Researcher/SuggestUpdate";
 import MyProposals from "./pages/Researcher/MyProposals";
+import PendingApprovals from "./pages/Admin/PendingApprovals";
+import DataManagement from "./pages/Admin/DataManagement";
+import ManageUsers from "./pages/Admin/ManageUsers";
+import ManageRegions from "./pages/Admin/ManageRegions";
+import ProfileSettings from "./pages/ProfileSettings";
 
 function App() {
   return (
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/settings" element={<ProfileSettings />} />
         <Route path="/dashboard/guest" element={<GuestDashboard />} />
         <Route path="/dashboard/viewer" element={<ViewerDashboard />} />
         <Route path="/dashboard/viewer/search" element={<SearchMap />} />
@@ -37,6 +43,10 @@ function App() {
         <Route path="/dashboard/researcher/suggest-update" element={<SuggestUpdate />} />
         <Route path="/dashboard/researcher/my-updates" element={<MyProposals />} />
         <Route path="/dashboard/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard/admin/pending" element={<PendingApprovals />} />
+        <Route path="/dashboard/admin/data" element={<DataManagement />} />
+        <Route path="/dashboard/admin/users" element={<ManageUsers />} />
+        <Route path="/dashboard/admin/regions" element={<ManageRegions />} />
         <Route path="/static/add/region" element={<StaticAddRegion />} />
         <Route path="/static/add/user" element={<StaticAddUser />} />
         <Route path="/static/add/forest_observation" element={<StaticAddForestObservation />} />

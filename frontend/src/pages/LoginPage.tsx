@@ -1,17 +1,28 @@
 import { Form, Formik } from "formik";
 import TextInput from "../components/form/TextInput";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { format } from "date-fns";
 import "./common.css";
 
-interface LoginForm {
+interface AuthForm {
   username: string;
   password: string;
+  email?: string;
 }
 
 export default function Login() {
   const navigate = useNavigate();
+  const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleLogin = async (values: LoginForm) => {
+  const handleGuestLogin = () => {
+    localStorage.clear();
+    localStorage.setItem("acct_type", "Guest");
+    localStorage.setItem("username", "Guest User");
+    navigate('/dashboard/guest');
+  };
+
+  const handleAuth = async (values: AuthForm) => {
     // DEV QUICK LOGIN BYPASS
     const lowerUser = values.username.toLowerCase();
     if (["admin", "researcher", "viewer", "guest"].includes(lowerUser)) {
@@ -29,6 +40,32 @@ export default function Login() {
     }
 
     try {
+      if (isSignUp) {
+         if (!values.email) {
+            alert("Email is required to sign up.");
+            return;
+         }
+         const today = format(new Date(), "yyyy-MM-dd");
+         const signupPayload = {
+             username: values.username,
+             email: values.email,
+             acct_type: "Subscriber", // Default for new signups
+             pw_hash: values.password,
+             creation_date: today
+         };
+         const signupRes = await fetch("http://localhost:8000/users/", {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify(signupPayload)
+         });
+         
+         if (!signupRes.ok) {
+             const errorData = await signupRes.json();
+             alert(errorData.detail || "Error creating account. Username/Email may already be taken.");
+             return;
+         }
+      }
+
       const params = new URLSearchParams({
         username: values.username,
         password: values.password,
@@ -114,14 +151,22 @@ export default function Login() {
         {/* Right Side - Login Form */}
         <div className="login-right">
           <div className="login-card">
-            <h2>Welcome Back</h2>
-            <p className="login-subtitle">Sign in to access the system</p>
+            <h2>{isSignUp ? "Create an Account" : "Welcome Back"}</h2>
+            <p className="login-subtitle">
+              {isSignUp ? "Sign up to track and save global forest assets" : "Sign in to access the system"}
+            </p>
 
             <Formik
-              initialValues={{ username: "", password: "" }}
-              onSubmit={handleLogin}
+              initialValues={{ username: "", password: "", email: "" }}
+              onSubmit={handleAuth}
             >
               <Form>
+                {isSignUp && (
+                  <div className="form-group">
+                    <TextInput label="Email Address" name="email" type="email" />
+                  </div>
+                )}
+                
                 <div className="form-group">
                   <TextInput label="Username" name="username" />
                 </div>
@@ -131,13 +176,36 @@ export default function Login() {
                 </div>
 
                 <button type="submit" className="login-button">
-                  Sign In
+                  {isSignUp ? "Sign Up" : "Sign In"}
                 </button>
               </Form>
             </Formik>
 
             <div className="login-help">
-              Don't have an account? Contact your administrator.
+              {isSignUp ? (
+                <>Already have an account? <span style={{ color: "#2D6A4F", cursor: "pointer", fontWeight: "bold" }} onClick={() => setIsSignUp(false)}>Sign in here.</span></>
+              ) : (
+                <>Don't have an account? <span style={{ color: "#2D6A4F", cursor: "pointer", fontWeight: "bold" }} onClick={() => setIsSignUp(true)}>Sign up here.</span></>
+              )}
+            </div>
+
+            <div style={{ marginTop: "1rem", textAlign: "center" }}>
+              <button 
+                onClick={handleGuestLogin} 
+                className="guest-button" 
+                style={{ 
+                  background: "transparent", 
+                  border: "1px solid #ccc", 
+                  color: "#555", 
+                  padding: "8px 16px", 
+                  borderRadius: "8px", 
+                  cursor: "pointer", 
+                  fontSize: "0.9rem",
+                  fontWeight: "bold"
+                }}
+              >
+                Continue as Guest →
+              </button>
             </div>
           </div>
         </div>

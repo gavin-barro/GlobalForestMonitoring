@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, UTC
 from sqlalchemy import text
 from .database import get_db
-from .routers import users, regions, metrics, time_periods, subscriptions, forest_observations, pending_updates, region_classifications, land_cover_types
+from .routers import users, regions, metrics, time_periods, subscriptions, forest_observations, pending_updates, region_classifications, land_cover_types, stats
 import uvicorn
 
 app = FastAPI(
@@ -19,7 +19,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["*"],
+    allow_origin_regex = r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials = True,
     allow_methods = ["*"],
     allow_headers = ["*"],
@@ -34,6 +34,7 @@ app.include_router(metrics.router)
 app.include_router(forest_observations.router)
 app.include_router(region_classifications.router)
 app.include_router(land_cover_types.router)
+app.include_router(stats.router)
 
 # Root endpoint - Test 
 @app.get("/", tags = ["General"])

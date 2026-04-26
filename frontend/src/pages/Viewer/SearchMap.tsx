@@ -16,11 +16,15 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Center map helper
-const MapEffect = ({ center }: { center: [number, number] }) => {
+const MapEffect = ({ center, bounds }: { center: [number, number], bounds: L.LatLngBounds | null }) => {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, 4, { animate: true, duration: 1.5 });
-  }, [center, map]);
+    if (bounds) {
+      map.flyToBounds(bounds, { animate: true, duration: 1.5, padding: [20, 20] });
+    } else {
+      map.flyTo(center, 4, { animate: true, duration: 1.5 });
+    }
+  }, [center, bounds, map]);
   return null;
 }
 
@@ -39,8 +43,8 @@ export default function SearchMap() {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<Region[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
-  // Default roughly over global or south america 
   const [mapCenter, setMapCenter] = useState<[number, number]>([-10, -55]);
+  const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null);
   const [allPins, setAllPins] = useState<Region[]>([]);
   const [subscribedRegionIds, setSubscribedRegionIds] = useState<Set<number>>(new Set());
 
@@ -118,20 +122,22 @@ export default function SearchMap() {
 
   const handleSelect = (r: Region) => {
     setSelectedRegion(r);
+    setMapBounds(null); // Reset bounds first
+
     if (!r.geo_boundary) return;
 
     if (r.geo_boundary.trim().startsWith('{')) {
       try {
-        const match = r.geo_boundary.match(/\[\s*([-\d\.]+)\s*,\s*([-\d\.]+)\s*\]/);
-        if (match) {
-          const lng = parseFloat(match[1]);
-          const lat = parseFloat(match[2]);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            setMapCenter([lat, lng]);
-          }
+        const geoObj = JSON.parse(r.geo_boundary);
+        // Create a temporary layer to calculate bounds
+        const layer = L.geoJSON(geoObj);
+        const bounds = layer.getBounds();
+        if (bounds.isValid()) {
+          setMapBounds(bounds);
+          setMapCenter([bounds.getCenter().lat, bounds.getCenter().lng]);
         }
       } catch (e) {
-        console.error(e);
+        console.error("GeoJSON parse error in handleSelect:", e);
       }
     } else {
       const parts = r.geo_boundary.split(',');
@@ -289,7 +295,7 @@ export default function SearchMap() {
               attribution='&copy; OpenStreetMap'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <MapEffect center={mapCenter} />
+            <MapEffect center={mapCenter} bounds={mapBounds} />
             {allPins.map(r => {
               if (!r.geo_boundary) return null;
 

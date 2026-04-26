@@ -1,7 +1,8 @@
 import axios, { type AxiosResponse } from 'axios';
 import type { ForestObservationFormBackend, ForestObservationGet, Metric, Region, Subscription, TimePeriod, RegionClassification,
     UserFormBackend, UserGet, LandCoverType, LCTCreate, RegionClassificationCreate,
-    UserProfileToken, } from './types';
+    UserProfileToken, DashboardStats } from './types';
+
 
 // TODO: Ideally some structure like:
 // const apiUrl =
@@ -49,9 +50,15 @@ export const getSubscriptionByUser = async(user_id: number): Promise<Subscriptio
 // CREATE
 async function requestCreate<T>(endpoint: string, formData: T): Promise<Boolean> {
     try {
+        const token = localStorage.getItem('token');
         await axios.post(
             `${apiUrl}/${endpoint}/`,
-            formData
+            formData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
         );
         return true;
     } catch (error) {
@@ -111,3 +118,45 @@ export const requestDeleteRegionClassification = async(lct_id: number, region_id
         return false;
     }
 };
+
+export const getViewerStats = async (user_id: number): Promise<DashboardStats | null> => {
+    try {
+        const response: AxiosResponse<DashboardStats> = await axios.get(`${apiUrl}/stats/viewer/${user_id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching viewer stats:", error);
+        return null;
+    }
+};
+
+export const getGuestStats = async (): Promise<DashboardStats | null> => {
+    try {
+        const response: AxiosResponse<DashboardStats> = await axios.get(`${apiUrl}/stats/guest`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching guest stats:", error);
+        return null;
+    }
+};
+
+export const getResearcherStats = async (user_id: number): Promise<DashboardStats | null> => {
+    try {
+        const response: AxiosResponse<DashboardStats> = await axios.get(`${apiUrl}/stats/researcher/${user_id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching researcher stats:", error);
+        return null;
+    }
+};
+
+export const getAdminStats = async (): Promise<DashboardStats | null> => {
+    try {
+        const response: AxiosResponse<DashboardStats> = await axios.get(`${apiUrl}/stats/admin`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching admin stats:", error);
+        return null;
+    }
+};
+
+

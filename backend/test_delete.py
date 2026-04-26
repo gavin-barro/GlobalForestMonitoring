@@ -2,7 +2,7 @@ import urllib.request
 import urllib.parse
 import json
 
-# 1. Login to get token
+# Login to get token
 login_url = "http://localhost:8000/users/login?username=gavin_barro&password=password"
 req = urllib.request.Request(login_url, method="POST")
 with urllib.request.urlopen(req) as response:
@@ -10,7 +10,7 @@ with urllib.request.urlopen(req) as response:
     token = res_data.get("access_token")
     print("Token:", token)
 
-# 2. Get users
+# Get users
 req_users = urllib.request.Request("http://localhost:8000/users/")
 with urllib.request.urlopen(req_users) as response:
     users = json.loads(response.read().decode())

@@ -126,3 +126,12 @@ export interface RegionClassificationCreate {
     lct_id: number;
     region_id: number;
 }
+
+// STATISTICS
+export interface DashboardStats {
+    count: number;
+    sum: number;
+    max: number;
+    min: number;
+    avg: number;
+}

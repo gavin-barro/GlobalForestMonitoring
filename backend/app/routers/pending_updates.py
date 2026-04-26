@@ -73,35 +73,33 @@ async def create_pending_update(pu_data: PUCreate, db: AsyncSession = Depends(ge
     return new_pu
 
 @router.patch("/{pu_id}", response_model=PUResponse)
-async def update_pending_update(pu_id: int, pu_update: PUUpdate, db: AsyncSession = Depends(get_db)):
+async def update_pending_update(pu_id: int, pu_update: PUUpdate, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
     """
         Partial update of a PendingUpdate (e.g., change name, type, parent)
     """
     repository = PURepository(db)
     user_repo = UserRepository(db)
 
-    if pu_update.pending is not None and pu_update.pending == False:
-        raise HTTPException(status_code=400, detail="Cannot set pending to False via this endpoint. Use /approve/{pu_id} instead.")
+    is_admin = current_user.get("acct_type") in ["Administrator", "Admin"]
 
-    current_user = await get_current_user(db)
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="Authentication required to update pending updates")
-    if current_user.get("user_id") != pu_update.submitting_user_id and current_user.get("acct_type") != "admin":
-        raise HTTPException(status_code=403, detail="Only the submitting user or an admin can update this pending update")
-    if current_user.get("acct_type") != "admin":
-        raise HTTPException(status_code=403, detail="Admin privileges required to update pending updates")
 
-    # If updating submitting_user_id as admin, check if the new user exists
-    if current_user.get("acct_type") == "admin" and pu_update.submitting_user_id is not None:
-        user = await user_repo.get_by_id(pu_update.submitting_user_id)
+    if not is_admin:
+        # If not admin, they can only update their own proposal
+        pu = await repository.get_by_id(pu_id)
+        if not pu or pu.submitting_user_id != current_user.get("user_id"):
+            raise HTTPException(status_code=403, detail="Only the submitting researcher or an admin can update this proposal")
+    
+    # Check if we are trying to approve via this generic update endpoint (we shouldn't)
+    if pu_update.status == "Approved":
+        raise HTTPException(status_code=400, detail="Use the /approve/{id} endpoint to authorize updates")
+
+
+    # If updating as admin, allow updating approving_admin_id
+    if is_admin and pu_update.approving_admin_id is not None:
+        user = await user_repo.get_by_id(pu_update.approving_admin_id)
         if not user:
-            raise HTTPException(status_code=400, detail="Submitting user does not exist")
-        
-    # If updating admin_user_id as admin, check if the new user exists
-    if current_user.get("acct_type") == "admin" and pu_update.admin_user_id is not None:
-        admin = await user_repo.get_by_id(pu_update.admin_user_id)
-        if not admin:
-            raise HTTPException(status_code=400, detail="Admin user does not exist")
+            raise HTTPException(status_code=400, detail="Target admin user does not exist")
+
 
     updated = await repository.update(pu_id, pu_update)
     if updated is None:
@@ -115,8 +113,10 @@ async def approve_pending_update(pu_id: int, db: AsyncSession = Depends(get_db),
     """
     repository = PURepository(db)
 
-    if not admin or admin.get("acct_type") != "admin":
+    # Dependency get_admin_user already verified the role
+    if not admin:
         raise HTTPException(status_code=403, detail="Admin privileges required to approve pending updates")
+
 
     approved = await repository.approve(pu_id)
     if approved is None:

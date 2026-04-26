@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import StatsBanner from "../../components/StatsBanner";
 import "./dashboard.css";
 
 export default function GuestDashboard() {
@@ -19,8 +20,10 @@ export default function GuestDashboard() {
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Guest!</h2>
           <h1 className="home-title">Public Data Portal</h1>
-          <p className="home-subtitle">Exploring Global Forest Monitoring Insights</p>
+          <p className="home-subtitle" style={{ marginBottom: '2rem' }}>Exploring Global Forest Monitoring Insights</p>
         </div>
+
+        <StatsBanner userId={0} role="Guest" />
 
         <div className="dashboard-grid">
           <Link to="/dashboard/viewer/search" className="dashboard-card">

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import StatsBanner from "../../components/StatsBanner";
 import "./dashboard.css";
 
 export default function AdminDashboard() {
@@ -20,8 +21,10 @@ export default function AdminDashboard() {
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Admin, {username}!</h2>
           <h1 className="home-title">Administrator Console</h1>
-          <p className="home-subtitle">System Overwatch & User Management</p>
+          <p className="home-subtitle" style={{ marginBottom: "2rem" }}>System Overwatch & User Management</p>
         </div>
+
+        <StatsBanner userId={0} role="Admin" />
 
         <div className="dashboard-grid">
           <Link to="/dashboard/admin/regions" className="dashboard-card">

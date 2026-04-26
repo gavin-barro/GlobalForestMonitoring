@@ -689,3 +689,126 @@ class RCRepository(BaseRepository):
         await self.db.execute(sql, {"region_id": region_id, "lct_id": lct_id})
         await self.commit()
         return True
+
+class StatsRepository(BaseRepository):
+    """Repository for computing SQL aggregate statistics."""
+
+    async def get_viewer_stats(self, user_id: int) -> dict:
+        """
+        Compute aggregate stats for a viewer based on their saved subscriptions.
+        Uses: COUNT, SUM, MAX, MIN, AVG
+        """
+        # 1. COUNT: Total subscriptions
+        count_sql = text("SELECT COUNT(*) FROM subscriptions WHERE user_id = :user_id AND active = true")
+        count_res = await self.db.execute(count_sql, {"user_id": user_id})
+        # Handle count result correctly for sqlalchemy
+        result_count = count_res.scalar()
+        sub_count = int(result_count) if result_count else 0
+
+        # 2-5: Aggregates across the matching observation data
+        # We join subscriptions to forest_observations on region and metric
+        agg_sql = text("""
+            SELECT 
+                SUM(fo.value) as total_value,
+                MAX(fo.value) as max_value,
+                MIN(fo.value) as min_value,
+                AVG(fo.value) as avg_value
+            FROM forest_observations fo
+            JOIN subscriptions s ON fo.describing_region_id = s.region_id 
+                AND fo.observation_metric = s.metric_id
+            WHERE s.user_id = :user_id AND s.active = true
+        """)
+        
+        agg_res = await self.db.execute(agg_sql, {"user_id": user_id})
+        row = agg_res.fetchone()
+        
+        return {
+            "count": sub_count,
+            "sum": round(row.total_value, 2) if row and row.total_value else 0,
+            "max": round(row.max_value, 2) if row and row.max_value else 0,
+            "min": round(row.min_value, 2) if row and row.min_value else 0,
+            "avg": round(row.avg_value, 2) if row and row.avg_value else 0
+        }
+
+    async def get_guest_stats(self) -> dict:
+        """
+        Compute global aggregate stats for guest users.
+        Uses: COUNT(DISTINCT), SUM, MAX, MIN, AVG
+        """
+        # Global Aggregates across all observations
+        agg_sql = text("""
+            SELECT 
+                COUNT(DISTINCT describing_region_id) as region_count,
+                SUM(value) as total_value,
+                MAX(value) as max_value,
+                MIN(value) as min_value,
+                AVG(value) as avg_value
+            FROM forest_observations
+        """)
+        
+        agg_res = await self.db.execute(agg_sql)
+        row = agg_res.fetchone()
+        
+        return {
+            "count": row.region_count if row and row.region_count else 0,
+            "sum": round(row.total_value, 2) if row and row.total_value else 0,
+            "max": round(row.max_value, 2) if row and row.max_value else 0,
+            "min": round(row.min_value, 2) if row and row.min_value else 0,
+            "avg": round(row.avg_value, 2) if row and row.avg_value else 0
+        }
+
+    async def get_researcher_stats(self, user_id: int) -> dict:
+        """
+        Compute aggregate stats for a researcher based on their pending submissions.
+        Uses: COUNT, SUM, MAX, MIN, AVG
+        """
+        # Aggregates across the matching pending updates data
+        agg_sql = text("""
+            SELECT 
+                COUNT(update_id) as total_count,
+                SUM(proposed_value) as total_value,
+                MAX(proposed_value) as max_value,
+                MIN(proposed_value) as min_value,
+                AVG(proposed_value) as avg_value
+            FROM pending_updates
+            WHERE submitting_user_id = :user_id
+        """)
+        
+        agg_res = await self.db.execute(agg_sql, {"user_id": user_id})
+        row = agg_res.fetchone()
+        
+        return {
+            "count": row.total_count if row and row.total_count else 0,
+            "sum": round(row.total_value, 2) if row and row.total_value else 0,
+            "max": round(row.max_value, 2) if row and row.max_value else 0,
+            "min": round(row.min_value, 2) if row and row.min_value else 0,
+            "avg": round(row.avg_value, 2) if row and row.avg_value else 0
+        }
+
+    async def get_admin_stats(self) -> dict:
+        """
+        Compute system-wide aggregate stats for admins.
+        Uses: COUNT(users), SUM(obs), MAX(pending), MIN(obs), AVG(pending)
+        """
+        # User Count
+        user_sql = text("SELECT COUNT(*) FROM users")
+        user_res = await self.db.execute(user_sql)
+        user_count = user_res.scalar() or 0
+
+        # Global Observation Aggregates
+        obs_sql = text("SELECT SUM(value) as total_sum, MIN(value) as min_val FROM forest_observations")
+        obs_res = await self.db.execute(obs_sql)
+        obs_row = obs_res.fetchone()
+
+        # Pending Aggregates
+        pending_sql = text("SELECT MAX(proposed_value) as max_pending, AVG(proposed_value) as avg_pending FROM pending_updates")
+        pending_res = await self.db.execute(pending_sql)
+        pending_row = pending_res.fetchone()
+
+        return {
+            "count": user_count,
+            "sum": round(obs_row.total_sum, 2) if obs_row and obs_row.total_sum else 0,
+            "max": round(pending_row.max_pending, 2) if pending_row and pending_row.max_pending else 0,
+            "min": round(obs_row.min_val, 2) if obs_row and obs_row.min_val else 0,
+            "avg": round(pending_row.avg_pending, 2) if pending_row and pending_row.avg_pending else 0
+        }

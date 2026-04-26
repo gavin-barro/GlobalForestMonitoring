@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import StatsBanner from "../../components/StatsBanner";
 import "./dashboard.css";
 
 export default function ResearcherDashboard() {
@@ -21,8 +22,10 @@ export default function ResearcherDashboard() {
         <div className="home-header">
           <h2 className="welcome-banner">Welcome, {username}!</h2>
           <h1 className="home-title">Researcher Workbench</h1>
-          <p className="home-subtitle">Analyze trends and propose localized forest updates.</p>
+          <p className="home-subtitle" style={{ marginBottom: "2rem" }}>Analyze trends and propose localized forest updates.</p>
         </div>
+
+        <StatsBanner userId={Number(localStorage.getItem('user_id') || 0)} role="Researcher" />
 
         <div className="dashboard-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
         

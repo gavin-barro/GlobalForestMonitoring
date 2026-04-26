@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import StatsBanner from "../../components/StatsBanner";
 import "./dashboard.css";
 
 export default function ViewerDashboard() {
@@ -20,8 +21,10 @@ export default function ViewerDashboard() {
         <div className="home-header">
           <h2 className="welcome-banner">Welcome Viewer, {username}!</h2>
           <h1 className="home-title">Viewer Dashboard</h1>
-          <p className="home-subtitle">Monitor and Track Your Regions</p>
+          <p className="home-subtitle" style={{ marginBottom: '2rem' }}>Monitor and Track Your Regions</p>
         </div>
+
+        <StatsBanner userId={Number(localStorage.getItem('user_id') || 0)} role="Viewer" />
 
         <div className="dashboard-grid">
           <Link to="/dashboard/viewer/search" className="dashboard-card">

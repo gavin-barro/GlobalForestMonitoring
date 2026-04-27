@@ -93,12 +93,14 @@ class UserRepository(BaseRepository):
         return user
 
     async def delete(self, user_id: int) -> bool:
-        if not await self.get_by_id(user_id):
+        user = await self.get_by_id(user_id)
+        if not user:
             return False
-        sql = text("DELETE FROM users WHERE user_id = :user_id")
-        await self.db.execute(sql, {"user_id": user_id})
+        
+        await self.db.delete(user)
         await self.commit()
         return True
+
 
 
 class RegionRepository(BaseRepository):
@@ -182,10 +184,11 @@ class RegionRepository(BaseRepository):
         region = await self.get_by_id(region_id)
         if not region:
             return False
-        sql = text("DELETE FROM regions WHERE region_id = :region_id")
-        await self.db.execute(sql, {"region_id": region_id})
+        
+        await self.db.delete(region)
         await self.commit()
         return True
+
 
 
 class MetricRepository(BaseRepository):
@@ -630,10 +633,11 @@ class PURepository(BaseRepository):
         pu = await self.get_by_id(update_id)
         if not pu:
             return False
-        sql = text("DELETE FROM pending_updates WHERE update_id = :update_id")
-        await self.db.execute(sql, {"update_id": update_id})
+        
+        await self.db.delete(pu)
         await self.commit()
         return True
+
     
 class RCRepository(BaseRepository):
     """

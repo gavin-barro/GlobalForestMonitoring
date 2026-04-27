@@ -104,8 +104,17 @@ export default function HistoricalTrends() {
   }, [regionId]);
 
   const acctType = localStorage.getItem('acct_type');
-  const backLink = acctType === 'Researcher' ? '/dashboard/researcher' : '/dashboard/viewer/saved';
-  const backText = acctType === 'Researcher' ? '← Back to Dashboard' : '← Back to Saved Regions';
+  let backLink = '/dashboard/viewer/saved';
+  let backText = '← Back to Saved Regions';
+
+  if (acctType === 'Researcher') {
+     backLink = '/dashboard/researcher';
+     backText = '← Back to Dashboard';
+  } else if (acctType === 'Guest') {
+     backLink = '/dashboard/guest';
+     backText = '← Back to Public Portal';
+  }
+
 
   return (
     <div className="page home-page" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>

@@ -49,9 +49,10 @@ class Users(Base):
     last_login = Column(DateTime)
 
     # Relationships
-    subscriptions = relationship("Subscriptions", back_populates="user")
-    submitted_updates = relationship("PendingUpdates", foreign_keys="[PendingUpdates.submitting_user_id]", back_populates="submitting_user")
-    approved_updates = relationship("PendingUpdates", foreign_keys="[PendingUpdates.approving_admin_id]", back_populates="approving_admin")
+    subscriptions = relationship("Subscriptions", back_populates="user", cascade="all, delete-orphan")
+    submitted_updates = relationship("PendingUpdates", foreign_keys="[PendingUpdates.submitting_user_id]", back_populates="submitting_user", cascade="all, delete-orphan")
+    approved_updates = relationship("PendingUpdates", foreign_keys="[PendingUpdates.approving_admin_id]", back_populates="approving_admin", cascade="all, delete-orphan")
+
 
 class Regions(Base):
     __tablename__ = "regions"

@@ -15,7 +15,7 @@ export default function ManageUsers() {
    // Form State
    const [formUsername, setFormUsername] = useState('');
    const [formEmail, setFormEmail] = useState('');
-   const [formType, setFormType] = useState<'Admin' | 'Researcher' | 'Subscriber' | 'Guest'>('Subscriber');
+   const [formType, setFormType] = useState<'Admin' | 'Researcher' | 'Subscriber'>('Subscriber');
    const [formPassword, setFormPassword] = useState('');
    const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,7 +68,7 @@ export default function ManageUsers() {
       if (success) {
          alert("User added successfully.");
          getAllUsers().then(setUsers);
-         setFormUsername(''); setFormEmail(''); setFormPassword(''); setFormType('Guest');
+         setFormUsername(''); setFormEmail(''); setFormPassword(''); setFormType('Subscriber');
          setActiveTab('view');
       } else {
          alert("Error adding user (username or email may already exist).");
@@ -166,7 +166,6 @@ export default function ManageUsers() {
                      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         <label style={{ fontWeight: "600", color: "#1b4332" }}>Account Role</label>
                         <select value={formType} onChange={e => setFormType(e.target.value as any)} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid #ccc", background: "white" }}>
-                           <option value="Guest">Guest</option>
                            <option value="Subscriber">Subscriber / Viewer</option>
                            <option value="Researcher">Researcher</option>
                            <option value="Admin">Administrator</option>

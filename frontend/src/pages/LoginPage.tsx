@@ -25,14 +25,14 @@ export default function Login() {
   const handleAuth = async (values: AuthForm) => {
     // DEV QUICK LOGIN BYPASS
     const lowerUser = values.username.toLowerCase();
-    if (["admin", "researcher", "viewer", "guest"].includes(lowerUser)) {
+    if (["admin", "researcher", "viewer"].includes(lowerUser)) {
         localStorage.setItem("token", "dummy");
         localStorage.setItem("username", values.username);
         
-        let role = "Guest";
+        let role = "Viewer";
         if (lowerUser === "admin") role = "Administrator";
         if (lowerUser === "researcher") role = "Researcher";
-        if (lowerUser === "viewer") role = "Viewer";
+
         
         localStorage.setItem("acct_type", role);
         navigate(`/dashboard/${lowerUser}`);
@@ -103,7 +103,7 @@ export default function Login() {
       localStorage.setItem("acct_type", role);
 
       // Route to correct dashboard
-      let path = "guest";
+      let path = "viewer"; // Default to viewer for all non-guests
       if (role === "Administrator" || role === "Admin") path = "admin";
       else if (role === "Researcher") path = "researcher";
       else if (role === "Viewer" || role === "Subscriber") path = "viewer";

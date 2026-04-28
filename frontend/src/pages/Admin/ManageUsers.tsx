@@ -32,7 +32,6 @@ export default function ManageUsers() {
    }, [navigate]);
 
    const handleDelete = async (id: number) => {
-      // Prevent suicide
       if (id.toString() === localStorage.getItem('user_id')) {
          alert("You cannot delete your own account.");
          return;
@@ -115,19 +114,58 @@ export default function ManageUsers() {
                         boxShadow: "0 4px 15px rgba(0,0,0,0.03)",
                         border: "1px solid rgba(255,255,255,0.7)"
                      }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                           <div>
+                        <div style={{ marginBottom: "1rem" }}>
+                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.2rem" }}>
                               <h3 style={{ margin: 0, color: "#1b4332", fontSize: "1.3rem" }}>{user.username}</h3>
-                              <div style={{ fontSize: "0.9rem", color: "#555" }}>{user.email}</div>
+                              <span style={{ fontSize: "0.75rem", color: "#888", background: "#f0f0f0", padding: "2px 6px", borderRadius: "4px" }}>ID: {user.user_id}</span>
                            </div>
-                           <span style={{
-                              background: user.acct_type === 'Admin' || user.acct_type === 'Administrator' ? '#e8f5e9' : '#f5f5f5',
-                              color: user.acct_type === 'Admin' || user.acct_type === 'Administrator' ? '#2e7d32' : '#666',
-                              padding: "4px 8px", borderRadius: "8px", fontSize: "0.8rem", fontWeight: "bold"
-                           }}>
-                              {user.acct_type}
-                           </span>
+                           <div style={{ fontSize: "0.95rem", color: "#555", marginBottom: "1rem", wordBreak: "break-all" }}>
+                              {user.email}
+                           </div>
+                           
+                           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1rem" }}>
+                              <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#1b4332" }}>Account Role:</span>
+                              <select 
+                                 value={user.acct_type} 
+                                 onChange={async (e: any) => {
+                                    const newRole = e.target.value;
+                                    if (window.confirm(`Change ${user.username} to ${newRole}?`)) {
+                                       const success = await fetch(`http://localhost:8000/users/${user.user_id}`, {
+                                          method: 'PATCH',
+                                          headers: { 
+                                             'Content-Type': 'application/json',
+                                             'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                          },
+                                          body: JSON.stringify({ acct_type: newRole })
+                                       });
+                                       if (success.ok) {
+                                          setUsers(prev => prev.map(u => u.user_id === user.user_id ? {...u, acct_type: newRole} : u));
+                                       } else {
+                                          alert("Failed to update role.");
+                                       }
+                                    }
+                                 }}
+                                 style={{
+                                    background: user.acct_type === 'Admin' || user.acct_type === 'Administrator' ? '#e8f5e9' : 
+                                               user.acct_type === 'Researcher' ? '#e3f2fd' : '#f5f1e9',
+                                    color: user.acct_type === 'Admin' || user.acct_type === 'Administrator' ? '#2e7d32' : 
+                                           user.acct_type === 'Researcher' ? '#1976d2' : '#8b7355',
+                                    padding: "4px 10px", 
+                                    borderRadius: "8px", 
+                                    fontSize: "0.85rem", 
+                                    fontWeight: "bold", 
+                                    border: "1px solid rgba(0,0,0,0.05)", 
+                                    cursor: "pointer",
+                                    flex: 1
+                                 }}
+                              >
+                                 <option value="Admin">Admin</option>
+                                 <option value="Researcher">Researcher</option>
+                                 <option value="Subscriber">Subscriber</option>
+                              </select>
+                           </div>
                         </div>
+
                         <div style={{ fontSize: "0.85rem", color: "#888", marginBottom: "1rem" }}>
                            Joined: {user.creation_date}
                         </div>

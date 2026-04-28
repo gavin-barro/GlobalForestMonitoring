@@ -226,17 +226,37 @@ export default function SearchMap() {
   };
 
   return (
-    <div className="page home-page" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="page home-page" style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ padding: "1rem 2rem", width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
         <Link to={dashboardLink} style={{ color: "#2D6A4F", textDecoration: "none", fontWeight: "bold" }}>← Back to Dashboard</Link>
       </div>
       
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", padding: "1rem", gap: "1rem", maxWidth: "1200px", width: "100%", margin: "0 auto", marginBottom: "2rem" }}>
+      <div style={{ 
+        display: "flex", 
+        flex: 1, 
+        overflow: "hidden", 
+        padding: "1rem", 
+        gap: "1rem", 
+        maxWidth: "1200px", 
+        width: "100%", 
+        margin: "0 auto", 
+        marginBottom: "2rem",
+        maxHeight: "calc(100vh - 100px)" // FIX: Force containment
+      }}>
         
         {/* Sidebar */}
-        <div style={{ width: "380px", background: "rgba(255,255,255,0.7)", borderRadius: "16px", padding: "1.5rem", display: "flex", flexDirection: "column", boxShadow: "0 12px 30px rgba(0,0,0,0.05)" }}>
-          <h2 style={{ marginTop: 0, color: "#1b4332", fontSize: "1.4rem" }}>Search Regions</h2>
-          <form onSubmit={searchRegions} style={{ display: "flex", gap: "8px", marginBottom: "1rem" }}>
+        <div style={{ 
+          width: "380px", 
+          background: "rgba(255,255,255,0.7)", 
+          borderRadius: "16px", 
+          padding: "1.5rem", 
+          display: "flex", 
+          flexDirection: "column", 
+          boxShadow: "0 12px 30px rgba(0,0,0,0.05)",
+          height: "100%" // FIX: Fill parent
+        }}>
+          <h2 style={{ marginTop: 0, color: "#1b4332", fontSize: "1.4rem", marginBottom: "1rem" }}>Search Regions</h2>
+          <form onSubmit={searchRegions} style={{ display: "flex", gap: "8px", marginBottom: "1.5rem" }}>
             <input 
               type="text" 
               value={query}
@@ -247,7 +267,15 @@ export default function SearchMap() {
             <button type="submit" style={{ padding: "10px 18px", background: "#2D6A4F", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Search</button>
           </form>
 
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px", paddingRight: "4px" }}>
+          <div className="custom-scrollbar" style={{ 
+            flex: 1, 
+            overflowY: "scroll", // Force scrollbar to be visible/grabbable
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "12px", 
+            paddingRight: "10px"
+          }}>
+
             {results.map(r => (
               <div 
                 key={r.region_id} 

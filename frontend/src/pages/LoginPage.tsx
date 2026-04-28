@@ -138,8 +138,8 @@ export default function Login() {
               <span>Analyze statistical trends</span>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🔔</span>
-              <span>Get real-time alerts</span>
+              <span className="feature-icon">🗺️</span>
+              <span>Track Real Time Metrics</span>
             </div>
             <div className="feature-item">
               <span className="feature-icon">🌍</span>
